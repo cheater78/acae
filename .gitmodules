@@ -1,0 +1,6 @@
+[submodule "emu/qemu"]
+	path = emu/qemu
+	url = https://gitlab.com/qemu-project/qemu.git
+[submodule "benchmark/coremark/coremark"]
+	path = benchmark/coremark/coremark
+	url = https://github.com/eembc/coremark.git

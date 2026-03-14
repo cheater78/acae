@@ -1,0 +1,7 @@
+compile_commands.json
+.cache
+bin
+build
+*.swp
+arm-gcc-install/
+*.log
