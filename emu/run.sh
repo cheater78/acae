@@ -18,8 +18,8 @@ QEMU_TASK="$QEMU_ARM \
 	-kernel $TASK_BIN \
 	-semihosting \
 	$ARGS \
-	-icount shift=0,align=off,sleep=off" # \
-	#-plugin $QEMU_PL_TRACE"
+	-icount shift=0,align=off,sleep=off \
+	-plugin $QEMU_PL_TRACE"
 
 echo "${QEMU_TASK}"
 taskset -c 0 $QEMU_TASK

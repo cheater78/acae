@@ -24,9 +24,13 @@ int strcmp(const char *s1, const char *s2) {
     return (unsigned char)*s1 - (unsigned char)*s2;
 }
 
+#include "printf.h"
 void* malloc(unsigned long size) {
     extern void* _sbrk(ptrdiff_t incr);
-    return _sbrk(size);
+    size = (size + 7) & ~7; // align
+    void* new_heap_max = _sbrk(size);
+    printf("Malloc ptr: %#lx, end: %#lx, MSP: %#lx, H/S distance: %#lx\n", new_heap_max, new_heap_max + size, get_msp(), (void*)get_msp() - (new_heap_max + size));
+    return new_heap_max;
 }
 void free(void* p) {
 }

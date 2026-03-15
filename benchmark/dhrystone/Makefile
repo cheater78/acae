@@ -23,7 +23,7 @@ CFLAGS := \
 	\
 	-std=gnu89 \
 	-g0 \
-	-O2
+	-O0
 INCLUDES := -I$(CWD) -I$(BMPATH)
 LDFLAGS := -T $(BMPATH)/link.ld -lgcc -lc_nano -lnosys
 

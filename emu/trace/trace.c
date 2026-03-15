@@ -47,26 +47,22 @@ typedef struct {
 struct {
     uint64_t size;
     insn_info* data;
-} insns = { 0, NULL};
+} insns = {0, NULL};
 
-insn_info* push_insn(insn_info* insn) {
-    if(!insns.data) {
-        insns.size = 0;
-    }
-    insn_info* prev_data = insns.data;
-    uint64_t prev_size = insns.size;
-    insns.size++;
-    insns.data = malloc(sizeof(insn_info) * insns.size);
-    if(prev_data) {
-        memcpy(insns.data, prev_data, prev_size);
-    }
-    memcpy(insns.data + (sizeof(insn_info) * prev_size), &insn, sizeof(insn_info));
-    return insns.data + (sizeof(insn_info) * prev_size);
+insn_info* push_insn(const insn_info* insn) {
+    // Resize array
+    insn_info* new_data = realloc(insns.data, (insns.size + 1) * sizeof(insn_info));
+    if (!new_data) return NULL; // allocation failed
+
+    insns.data = new_data;
+    insns.data[insns.size] = *insn; // copy the struct
+    return &insns.data[insns.size++];
 }
 
 void free_insns() {
-    if(insns.data)
-        free(insns.data);
+    free(insns.data);
+    insns.data = NULL;
+    insns.size = 0;
 }
 
 // Instruction callback

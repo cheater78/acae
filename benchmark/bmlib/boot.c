@@ -14,12 +14,13 @@ void RESET_handler() {
     boot_SYSTICK_init();
     printf("      ..complete!\n");
 
-    printf("MSP: %x\n", get_msp());
+    printf("MSP: %#x\n", get_msp());
 
     // Boot setup complete
-    printf("Flash: begin: 0x%x, used: 0x%x / 0x%x\n", __flash_start, __flash_end - __flash_start, __flash_size);
-    printf("SRAM: begin: 0x%x, size: 0x%x\n", __sram_start, __sram_size);
-    printf("SRAM used: 0x%x, available: 0x%x\n", __heap_start - __sram_start, __stack_top - __heap_start);
+    printf("Flash: begin: 0x%#x, used: 0x%#x / 0x%x\n", __flash_start, __flash_end - __flash_start, __flash_size);
+    printf("SRAM: begin: 0x%#x, size: 0x%#x\n", __sram_start, __sram_size);
+    printf("SRAM used: 0x%#x, available: 0x%#x\n", __heap_start - __sram_start, __stack_top - __heap_start);
+    printf("HEAP at: 0x%#x, STACK at: 0x%#x\n", __heap_start, __stack_top);
     
     printf("Running Main\n");
     // run application
@@ -58,25 +59,21 @@ void HardFault_Debug(unsigned int *stack, unsigned int exc_lr) {
 
     printf("EXC_RETURN   : %08lx\n", exc_lr);
     printf("Stack frame  : %p\n", stack);
-
     printf("\n--- Registers ---\n");
-
-    printf("R0  = %08lx\n", r0);
-    printf("R1  = %08lx\n", r1);
-    printf("R2  = %08lx\n", r2);
-    printf("R3  = %08lx\n", r3);
-    printf("R12 = %08lx\n", r12);
-
-    printf("LR  = %08lx\n", lr);
-    printf("PC  = %08lx\n", pc);
-    printf("PSR = %08lx\n", psr);
-
+    printf("R0  = %#08lx\n", r0);
+    printf("R1  = %#08lx\n", r1);
+    printf("R2  = %#08lx\n", r2);
+    printf("R3  = %#08lx\n", r3);
+    printf("R12 = %#08lx\n", r12);
+    printf("LR  = %#08lx\n", lr);
+    printf("PC  = %#08lx\n", pc);
+    printf("PSR = %#08lx\n", psr);
     printf("\n--- Fault Status ---\n");
 
-    printf("CFSR  = %08lx\n", *SCB_CFSR);
-    printf("HFSR  = %08lx\n", *SCB_HFSR);
-    printf("MMFAR = %08lx\n", *SCB_MMFAR);
-    printf("BFAR  = %08lx\n", *SCB_BFAR);
+    printf("CFSR  = %#08lx\n", *SCB_CFSR);
+    printf("HFSR  = %#08lx\n", *SCB_HFSR);
+    printf("MMFAR = %#08lx\n", *SCB_MMFAR);
+    printf("BFAR  = %#08lx\n", *SCB_BFAR);
 
     unsigned int exception = (*SCB_ICSR) & 0x1FF;
 
@@ -86,7 +83,7 @@ void HardFault_Debug(unsigned int *stack, unsigned int exc_lr) {
     
     int i = 0; // c89
     for (; i < 16; i++) {
-        printf("%02d: %08lx\n", i, stack[i]);
+        printf("%02d: %#08lx\n", i, stack[i]);
     }
 
     printf("\n===========================================\n");

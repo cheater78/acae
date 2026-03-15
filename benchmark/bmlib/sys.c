@@ -7,11 +7,15 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 
-static byte* __heap_end = __heap_start;
+static byte* __heap_end = 0;
 
 // system backend implementations
 #define STACK_GUARD 1024
 void* _sbrk(ptrdiff_t incr) {
+    if (__heap_end == 0) {
+        __heap_end = __heap_start;
+    }
+
     byte* prev = __heap_end;
     byte* next = __heap_end + incr;
 
