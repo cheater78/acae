@@ -1,9 +1,9 @@
 [submodule "emu/qemu"]
 	path = emu/qemu
-	url = https://gitlab.com/qemu-project/qemu.git
+	url = https://github.com/cheater78/acae-qemu.git
 [submodule "benchmark/coremark/coremark"]
 	path = benchmark/coremark/coremark
-	url = https://github.com/eembc/coremark.git
+	url = https://github.com/cheater78/acae-coremark.git
 [submodule "benchmark/embench/embench"]
 	path = benchmark/embench/embench
 	url = https://github.com/embench/embench-iot.git
