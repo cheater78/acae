@@ -21,3 +21,4 @@ sudo apt autopurge -y
 git clone https://github.com/kmhallen/gcc-arm-none-eabi.git "${BASE_DIR}/arm-gcc-install"
 chmod +x "${BASE_DIR}/arm-gcc-install/gcc-arm-none-eabi-install.bash"
 "${BASE_DIR}/arm-gcc-install/gcc-arm-none-eabi-install.bash"
+rm -r "${BASE_DIR}/arm-gcc-install"

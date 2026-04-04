@@ -22,6 +22,8 @@ void RESET_handler() {
     printf("SRAM used: 0x%#x, available: 0x%#x\n", __heap_start - __sram_start, __stack_top - __heap_start);
     printf("HEAP at: 0x%#x, STACK at: 0x%#x\n", __heap_start, __stack_top);
     
+    dwt_init();
+
     printf("Running Main\n");
     // run application
     main();

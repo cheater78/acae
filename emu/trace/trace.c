@@ -1,7 +1,7 @@
 #include <sched.h>
 #include <stdint.h>
 #include <stdio.h>
-//#include <glib-2.0/glib.h>
+#include <glib-2.0/glib.h>
 #include <qemu/qemu-plugin.h>
 #include <stdlib.h>
 #include <string.h>
@@ -12,14 +12,14 @@ QEMU_PLUGIN_EXPORT int qemu_plugin_version = QEMU_PLUGIN_VERSION;
 
 #define F_CLK 100000000UL
 // Cycle Counter Address -> Default DWT_CYCCNT
-//static const uint64_t cyccnt_addr = 0xE0001004;
+static const uint64_t cyccnt_addr = 0xE0001004;
 
 // Global cycle counter
 static uint64_t total_cycles = 0;
 static uint64_t total_instructions = 0;
 static FILE *log_file = NULL;
 
-/*
+
 static void memory_read_access_cb(
     unsigned int vcpu_index,
     qemu_plugin_meminfo_t info,
@@ -29,14 +29,22 @@ static void memory_read_access_cb(
     if (vaddr != cyccnt_addr) {
         return;
     }
-    unsigned int size = qemu_plugin_mem_size_shift(info);
+    //unsigned int size = qemu_plugin_mem_size_shift(info);
     GByteArray cyc_value = {
         (guint8*)&total_cycles,
-        (guint)size
+        (guint)4
     };
     qemu_plugin_write_memory_vaddr(vaddr, &cyc_value);
+    fprintf(log_file, "dwt_cyccnt access wrote: %lu\n", total_cycles);
+    
+    uint32_t read_cycles = 0;
+    GByteArray read_cycles_value = {
+        (guint8*)&read_cycles,
+        (guint)4
+    };
+    qemu_plugin_read_memory_vaddr(vaddr, &read_cycles_value, 4);
+    fprintf(log_file, "dwt_cyccnt access read back: %lu\n", total_cycles);
 }
-*/
 
 typedef struct {
     op_code_t opcode;
@@ -79,12 +87,12 @@ void trace_trans_cb(qemu_plugin_id_t id, struct qemu_plugin_tb *tb) {
         struct qemu_plugin_insn *insn = qemu_plugin_tb_get_insn(tb, i);
         
         // register a memory access callback -> DWT_CYCCNT reads
-        //qemu_plugin_register_vcpu_mem_cb(
-        //    insn,
-        //    memory_read_access_cb,
-        //    QEMU_PLUGIN_CB_NO_REGS, // marked unused, not accessing any registers
-        //    QEMU_PLUGIN_MEM_R, // monitor reads only
-        //    NULL);
+        qemu_plugin_register_vcpu_mem_cb(
+            insn,
+            memory_read_access_cb,
+            QEMU_PLUGIN_CB_RW_REGS,
+            QEMU_PLUGIN_MEM_RW,
+            NULL);
 
         op_code_t opcode = 0; // Thumb2 -> T32 is the largest enconding
         uint64_t pc = qemu_plugin_insn_vaddr(insn);

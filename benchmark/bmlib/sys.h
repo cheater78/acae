@@ -68,3 +68,6 @@ static inline void exit(int status) {
 #define SYST_CVR (*(volatile unsigned int*)0xE000E018)
 
 unsigned long systick();
+
+// DWT
+#include "dwt.h"
