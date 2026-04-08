@@ -11,6 +11,11 @@ static char* utoa_s(unsigned long v, const unsigned int base, char* buf_end, uns
     static const char digits[] = "0123456789ABCDEF";
     char* p = buf_end; // one after the last elem
 
+    if(!v && buf_size) {
+        *--p = digits[0];
+        return p;
+    }
+
     while (v && buf_size) {
         *--p = digits[v % base]; // precrem
         v /= base;

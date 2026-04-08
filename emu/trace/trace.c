@@ -2,7 +2,7 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <glib-2.0/glib.h>
-#include <qemu/qemu-plugin.h>
+#include <plugins/qemu-plugin.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -11,14 +11,13 @@
 QEMU_PLUGIN_EXPORT int qemu_plugin_version = QEMU_PLUGIN_VERSION;
 
 #define F_CLK 100000000UL
-// Cycle Counter Address -> Default DWT_CYCCNT
-static const uint64_t cyccnt_addr = 0xE0001004;
+// Cycle Counter Address -> custom DWT_CYCCNT
+static const uint64_t cyccnt_addr = 0x40000004;
 
 // Global cycle counter
 static uint64_t total_cycles = 0;
 static uint64_t total_instructions = 0;
 static FILE *log_file = NULL;
-
 
 static void memory_read_access_cb(
     unsigned int vcpu_index,
@@ -29,21 +28,11 @@ static void memory_read_access_cb(
     if (vaddr != cyccnt_addr) {
         return;
     }
-    //unsigned int size = qemu_plugin_mem_size_shift(info);
     GByteArray cyc_value = {
         (guint8*)&total_cycles,
         (guint)4
     };
     qemu_plugin_write_memory_vaddr(vaddr, &cyc_value);
-    fprintf(log_file, "dwt_cyccnt access wrote: %lu\n", total_cycles);
-    
-    uint32_t read_cycles = 0;
-    GByteArray read_cycles_value = {
-        (guint8*)&read_cycles,
-        (guint)4
-    };
-    qemu_plugin_read_memory_vaddr(vaddr, &read_cycles_value, 4);
-    fprintf(log_file, "dwt_cyccnt access read back: %lu\n", total_cycles);
 }
 
 typedef struct {

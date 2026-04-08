@@ -8,15 +8,14 @@ int main(void) {
     printf("dec: %ld\n", 1234567890UL);
     printf("hex: %#08lx\n", 0xF0A9);
     printf("float: %06.3f\n", -123.321f); // front padding not working
-
-    volatile unsigned int ctrl = 1;
-    //ctrl = DWT_CTRL;
-    printf("DWT_CTRL:%x", ctrl);
-    printf("DWT_CYCCNT:%x", DWT_CYCCNT);
-
-    for(unsigned int i = 0; i < (1<<3); i++) {
-        volatile unsigned int cycs = dwt_cyccnt();
-        printf("[%u]:%u\n", i, cycs);
+    
+    static const unsigned int iterations = 1000000; 
+    const unsigned int start = DWT_CYCCNT;
+    for(unsigned int iter = 0; iter < iterations; iter++) {
+        const unsigned int passed = DWT_CYCCNT - start;
+        if (iter % (iterations / 10) == 0) {
+            printf("Iteration: %u, Cycles: %u, Cycles/Iter: %u\n", iter, passed, iter ? (passed / iter) : 0);
+        }
     }
 
     return 0;

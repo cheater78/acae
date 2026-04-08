@@ -17,14 +17,13 @@ CFLAGS := \
 	-fno-exceptions \
 	-fno-asynchronous-unwind-tables \
 	-fomit-frame-pointer \
-	-nostdlib \
-	-nodefaultlibs \
-	-specs=nano.specs \
+	-specs=nosys.specs \
+	-specs=nano.specs\
 	\
 	-g \
 	-O0
 INCLUDES := -I$(CWD) -I$(BMPATH)
-LDFLAGS := -T $(BMPATH)/link.ld -lgcc -lc_nano -lnosys
+LDFLAGS := -T $(BMPATH)/link.ld
 
 # Source files
 vpath .c $(CWD) $(BMPATH)

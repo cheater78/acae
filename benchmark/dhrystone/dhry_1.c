@@ -267,9 +267,9 @@ main ()
                         / (float) User_Time;
 #endif
     printf ("Microseconds for one run through Dhrystone: ");
-    printf ("%6.1f \n", Microseconds);
+    printf ("%f \n", Microseconds);
     printf ("Dhrystones per Second:                      ");
-    printf ("%6.1f \n", Dhrystones_Per_Second);
+    printf ("%f \n", Dhrystones_Per_Second);
     printf ("\n");
   }
   

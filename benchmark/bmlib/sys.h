@@ -1,4 +1,7 @@
 #pragma once
+
+#define F_CPU 100000000UL
+
 typedef unsigned char byte;
 typedef unsigned int word;
 typedef unsigned int ptr;
@@ -15,31 +18,31 @@ typedef void (*ptr_func_t)();
 
 // linker script symbols, already converted to byte(uint8_t) or word(uint32_t) ptrs
 // static ptrs and sizes
-SYMBOL_BYTE_PTR(__flash_start);
-SYMBOL_BYTE_PTR(__flash_end); // end of used flash
-SYMBOL_BYTE_SIZE(__flash_size); // size of available flash
+SYMBOL_BYTE_PTR(__flash_start__);
+SYMBOL_BYTE_PTR(__flash_end__); // end of used flash
+SYMBOL_BYTE_SIZE(__flash_size__); // size of available flash
 
-SYMBOL_BYTE_PTR(__sram_start);
-SYMBOL_BYTE_SIZE(__sram_size);
+SYMBOL_BYTE_PTR(__sram_start__);
+SYMBOL_BYTE_SIZE(__sram_size__);
 // static ram content
-SYMBOL_WORD_PTR(__data_start);
-SYMBOL_WORD_PTR(__data_end);
-SYMBOL_WORD_PTR(__data_load);
-SYMBOL_BYTE_PTR(__bss_start);
-SYMBOL_BYTE_PTR(__bss_end);
+SYMBOL_WORD_PTR(__data_start__);
+SYMBOL_WORD_PTR(__data_end__);
+SYMBOL_WORD_PTR(__data_load__);
+SYMBOL_WORD_PTR(__bss_start__);
+SYMBOL_WORD_PTR(__bss_end__);
 // dynamic ram content
-SYMBOL_BYTE_PTR(__heap_start);
-SYMBOL_BYTE_PTR(__stack_top);
+SYMBOL_BYTE_PTR(__heap_start__);
+SYMBOL_BYTE_PTR(__stack_top__);
 
-SYMBOL_FUNC_PTR(__preinit_array_start);
-SYMBOL_FUNC_PTR(__preinit_array_end);
-SYMBOL_FUNC_PTR(__init_array_start);
-SYMBOL_FUNC_PTR(__init_array_end);
-SYMBOL_FUNC_PTR(__fini_array_start);
-SYMBOL_FUNC_PTR(__fini_array_end);
+SYMBOL_FUNC_PTR(__preinit_array_start__);
+SYMBOL_FUNC_PTR(__preinit_array_end__);
+SYMBOL_FUNC_PTR(__init_array_start__);
+SYMBOL_FUNC_PTR(__init_array_end__);
+SYMBOL_FUNC_PTR(__fini_array_start__);
+SYMBOL_FUNC_PTR(__fini_array_end__);
 
 static inline byte* get_stack_top() {
-    return __stack_top;
+    return __stack_top__;
 }
 static inline __attribute__((always_inline))
 byte* get_msp(void) {
@@ -52,7 +55,7 @@ byte* get_msp(void) {
 #define HEAP_FREE_PATTERN 0x45455246
 
 static inline byte* get_heap_start() {
-    return __heap_start;
+    return __heap_start__;
 }
 byte* get_heap_end();
 

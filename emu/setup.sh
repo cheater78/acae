@@ -22,4 +22,4 @@ $QEMU_ARM -M help | grep $CPU
 echo "Building Qemu cycle tracer..."
 cd $QEMU_PL_TRACE
 # build + compile_commands
-bear -- make -C "${QEMU_PL_TRACE}"
+bear -- make -C "${QEMU_PL_TRACE}" clean all

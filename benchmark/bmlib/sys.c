@@ -7,23 +7,23 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 
-static byte* __heap_end = 0;
+static byte* __heap_end__ = 0;
 
 // system backend implementations
 #define STACK_GUARD 1024
 void* _sbrk(ptrdiff_t incr) {
-    if (__heap_end == 0) {
-        __heap_end = __heap_start;
+    if (__heap_end__ == 0) {
+        __heap_end__ = __heap_start__;
     }
 
-    byte* prev = __heap_end;
-    byte* next = __heap_end + incr;
+    byte* prev = __heap_end__;
+    byte* next = __heap_end__ + incr;
 
     if (next >= (byte*)get_msp() - STACK_GUARD) {
         errno = ENOMEM;
         return (void*)-1;
     }
-    __heap_end = next;
+    __heap_end__ = next;
     return prev;
 }
 
@@ -102,17 +102,26 @@ void _exit(int status)  {
     semihost_exit_ext(status);
 }
 
-int _getpid(void) { return 1; }
+int _kill(int pid, int sig) {
+    errno = EINVAL;
+    return -1;
+}
 
+int _getpid(void) {
+    return 1;
+}
+__attribute__((weak))
 void _init() {
 }
+
+__attribute__((weak))
 void _fini() {
 }
 
 //~ system backend implementations
 
 inline byte* get_heap_end() {
-    return __heap_end;
+    return __heap_end__;
 }
 
 // SYSTICK

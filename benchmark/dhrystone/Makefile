@@ -17,15 +17,14 @@ CFLAGS := \
 	-fno-exceptions \
 	-fno-asynchronous-unwind-tables \
 	-fomit-frame-pointer \
-	-nostdlib \
-	-nodefaultlibs \
-	-specs=nano.specs \
+	-specs=nosys.specs \
+	-specs=nano.specs\
 	\
 	-std=gnu89 \
 	-g0 \
 	-O0
 INCLUDES := -I$(CWD) -I$(BMPATH)
-LDFLAGS := -T $(BMPATH)/link.ld -lgcc -lc_nano -lnosys
+LDFLAGS := -T $(BMPATH)/link.ld
 
 # Source files
 BMSRCS := $(shell find $(BMPATH) -name '*.c')

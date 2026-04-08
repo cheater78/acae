@@ -9,7 +9,7 @@ void* malloc(unsigned long size);
 void free(void* p);
 
 // sys/times.h
-typedef long clock_t;
+typedef unsigned long clock_t;
 struct tms {
     clock_t tms_utime;		/* User CPU time.  */
     clock_t tms_stime;		/* System CPU time.  */

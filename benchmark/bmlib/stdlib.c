@@ -36,12 +36,13 @@ void free(void* p) {
 }
 
 clock_t times(struct tms *buffer) {
+    const clock_t utime = DWT_CYCCNT / (F_CPU / 1000000UL); // time as µs from clk cycles
     if (buffer) {
-        buffer->tms_utime  = systick();
+        buffer->tms_utime  = utime;
         buffer->tms_stime  = 0;
         buffer->tms_cutime = 0;
         buffer->tms_cstime = 0;
     }
 
-    return systick();
+    return utime;
 }
