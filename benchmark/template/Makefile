@@ -1,7 +1,8 @@
-# Directories
 CWD := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))
 BENCHPATH := $(abspath $(CWD)/..)
-BMPATH   := $(BENCHPATH)/bmlib
+ACAEPATH  := $(abspath $(BENCHPATH)/..)
+
+BMPATH   := $(ACAEPATH)/baremetal
 OUTPATH  := $(CWD)/bin
 
 # Compiler and flags

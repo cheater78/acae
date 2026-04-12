@@ -7,7 +7,7 @@ QEMU="${EMU_DIR}/qemu"
 QEMU_CONFIGURE="${QEMU}/configure"
 QEMU_BUILD="${QEMU}/build"
 QEMU_ARM="${QEMU_BUILD}/qemu-system-arm"
-QEMU_PL_TRACE="${EMU_DIR}/trace"
+QEMU_CYC_PL="${EMU_DIR}/plugin"
 
 echo "Building Qemu for ARM..."
 cd $QEMU
@@ -20,6 +20,6 @@ chmod +x $QEMU_ARM
 $QEMU_ARM -M help | grep $CPU
 
 echo "Building Qemu cycle tracer..."
-cd $QEMU_PL_TRACE
+cd $QEMU_CYC_PL
 # build + compile_commands
-bear -- make -C "${QEMU_PL_TRACE}" clean all
+bear -- make -C "${QEMU_CYC_PL}" clean all

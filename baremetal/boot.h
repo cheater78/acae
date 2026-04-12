@@ -44,10 +44,3 @@ static inline void boot_call_fini_array() {
         array++;
     }
 }
-
-// SYSTICK
-static inline void boot_SYSTICK_init() {
-    SYST_RVR = 0xFFFFFF;
-    SYST_CVR = 0;
-    SYST_CSR = 5; // enable + CPU clock
-}

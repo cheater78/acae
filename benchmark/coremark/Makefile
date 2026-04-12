@@ -1,10 +1,13 @@
-# Directories
 CWD := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))
+BENCHPATH := $(abspath $(CWD)/..)
+ACAEPATH  := $(abspath $(BENCHPATH)/..)
+
 COREMARKPATH := $(CWD)/coremark
 COREMARKBMPATH := $(COREMARKPATH)/barebones
-BENCHPATH := $(abspath $(CWD)/..)
-BMPATH   := $(BENCHPATH)/bmlib
+
+BMPATH   := $(ACAEPATH)/baremetal
 OUTPATH  := $(CWD)/bin
+
 
 # Compiler and flags
 CC := arm-none-eabi-gcc

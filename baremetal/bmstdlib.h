@@ -1,10 +1,15 @@
 #pragma once
+#include "sys.h"
+
 // STD LIB replacements
+// stdio.h
 #include "printf.h"
 
+// string.h
 char* strcpy(char *dest, const char *src);
 int strcmp(const char *s1, const char *s2);
 
+// memory.h
 void* malloc(unsigned long size);
 void free(void* p);
 
@@ -17,6 +22,9 @@ struct tms {
     clock_t tms_cutime;		/* User CPU time of dead children.  */
     clock_t tms_cstime;		/* System CPU time of dead children.  */
 };
-
 clock_t times(struct tms* buffer);
+
+// custom helpers
+unsigned long tick_diff(unsigned long start, unsigned long end, unsigned long tick_max);
+unsigned long tick_diff_u32(unsigned long start, unsigned long end);
 

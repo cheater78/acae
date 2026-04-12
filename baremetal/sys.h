@@ -1,7 +1,5 @@
 #pragma once
 
-#define F_CPU 100000000UL
-
 typedef unsigned char byte;
 typedef unsigned int word;
 typedef unsigned int ptr;
@@ -64,13 +62,17 @@ static inline void exit(int status) {
     _exit(status);
 }
 
-// SYSTICK (overflow resolves at max 1 phase - uintmax)
-#include "printf.h"
-#define SYST_CSR (*(volatile unsigned int*)0xE000E010)
-#define SYST_RVR (*(volatile unsigned int*)0xE000E014)
-#define SYST_CVR (*(volatile unsigned int*)0xE000E018)
-
-unsigned long systick();
+// platform environment
+#include "platform.h"
 
 // DWT
-#include "dwt.h"
+static inline void init_dwt() {
+    DWT_ENABLE;
+    DWT_LAR = 0xC5ACCE55; // unlock DWT (not needed for qemu, but required for real hardware)
+    DWT_CYCCNT = 0;
+    DWT_CTRL = 1;
+}
+
+static inline unsigned long dwt_cyccnt() {
+    return DWT_CYCCNT;
+}

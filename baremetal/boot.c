@@ -1,27 +1,18 @@
 #include "boot.h"
+#include "platform.h"
 #include "printf.h"
-#include "dwt.h"
 
 extern int main();
 
 void RESET_handler() {
     printf("ISP: %#x\n", __stack_top__);
 
-    printf("copy data\n");
     boot_copy_data();
-
-    printf("zero bss\n");
     boot_zero_bss();
-    
-    printf("heap init\n");
     boot_heap_init();
-
-    printf("call init arrays\n");
     boot_call_init_array();
 
-    printf("time setup\n");
-    boot_SYSTICK_init();
-    dwt_init();
+    init_dwt();
 
     // Boot setup complete
     printf("MSP: %#x\n", get_msp());

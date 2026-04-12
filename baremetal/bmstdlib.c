@@ -1,10 +1,8 @@
-#include "stdlib.h"
+#include "bmstdlib.h"
 #include "sys.h"
-
 #include <stddef.h>
-
-// STD
-
+// STD LIB replacements
+// string.h
 char* strcpy(char *dest, const char *src) {
     char *d = dest;
 
@@ -23,8 +21,7 @@ int strcmp(const char *s1, const char *s2) {
 
     return (unsigned char)*s1 - (unsigned char)*s2;
 }
-
-#include "printf.h"
+// memory.h
 void* malloc(unsigned long size) {
     extern void* _sbrk(ptrdiff_t incr);
     size = (size + 7) & ~7; // align
@@ -34,7 +31,7 @@ void* malloc(unsigned long size) {
 }
 void free(void* p) {
 }
-
+// sys/times.h
 clock_t times(struct tms *buffer) {
     const clock_t utime = DWT_CYCCNT / (F_CPU / 1000000UL); // time as µs from clk cycles
     if (buffer) {
@@ -45,4 +42,16 @@ clock_t times(struct tms *buffer) {
     }
 
     return utime;
+}
+
+// custom helpers
+unsigned long tick_diff(unsigned long start, unsigned long end, unsigned long tick_max) {
+    if (end >= start) {
+        return end - start;
+    } else {
+        return tick_max - (start - end); // correct OF for one phase (best we can do)
+    }
+}
+unsigned long tick_diff_u32(unsigned long start, unsigned long end) {
+    return tick_diff(start, end, 0xFFFFFFFF);
 }

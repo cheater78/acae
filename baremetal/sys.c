@@ -123,15 +123,3 @@ void _fini() {
 inline byte* get_heap_end() {
     return __heap_end__;
 }
-
-// SYSTICK
-unsigned long systick() {
-    static unsigned int last = 0;
-    unsigned int curr = 0xFFFFFF - SYST_CVR;
-    
-    if(curr < last) {
-        curr = 0xFFFFFF - (last - curr);
-    }
-    
-    return last = curr;
-}

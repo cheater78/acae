@@ -1,4 +1,4 @@
-#include "cycle_model.h"
+#include "cyc_model.h"
 
 typedef struct {
     uint32_t start;
@@ -8,8 +8,8 @@ typedef struct {
 
 #define NUM_REGIONS 2
 static mem_region_t memory_regions[NUM_REGIONS] = {
-    {0x08000000, 0x08020000, 1}, // Flash: 1 waitstate
-    {0x20000000, 0x20010000, 0}  // SRAM: 0 waitstate
+    {0x00000000, 0x00080000, 1}, // Flash(512K): 1 waitstate
+    {0x20000000, 0x20010000, 0}  // SRAM(64K): 0 waitstate
 };
 
 // Simplified cycle model for demo (replace with real opcode table)
