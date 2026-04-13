@@ -349,7 +349,7 @@
 
 // EDIT
 #include "bmstdlib.h"
-#define ITERATIONS 128
+#define ITERATIONS 1000
 //~EDIT!
 
 #ifndef TIME

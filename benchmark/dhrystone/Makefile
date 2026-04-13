@@ -4,46 +4,41 @@ BENCHPATH := $(abspath $(CWD)/..)
 ACAEPATH  := $(abspath $(BENCHPATH)/..)
 
 BMPATH   := $(ACAEPATH)/baremetal
+BOOTPATH := $(BMPATH)/boot
 OUTPATH  := $(CWD)/bin
 
-# Compiler and flags
-CC := arm-none-eabi-gcc
+# boot - defines the entrypoint
+include $(BOOTPATH)/boot.mk
+
 # preproc
 CPPFLAGS += -I$(CWD)
-CFLAGS += \
-	-mcpu=cortex-m4 \
-	-mthumb \
-	\
-	-mfloat-abi=soft \
-	-ffreestanding \
-	-fno-unwind-tables \
-	-fno-exceptions \
-	-fno-asynchronous-unwind-tables \
-	-fomit-frame-pointer \
-	-specs=nosys.specs \
-	-specs=nano.specs\
-	\
-	-g0 \
-	-O0
+CFLAGS += -g0 -O0
 # LDFLAGS +=
 # LDLIBS +=
 
 # Source files
-DHRYSRCS += $(shell find $(CWD) -name '*.c')
+DHRYSRCS := $(shell find $(CWD) -name '*.c')
 vpath .c $(CWD)
 
 include $(BMPATH)/baremetal.mk
 
-DHRYTARGET := $(OUTPATH)/dhrystone.o
-$(DHRYTARGET): $(DHRYSRCS)
-	@mkdir -p $(OUTPATH)
-	$(CC) $(CPPFLAGS) -std=gnu89 $(CFLAGS) $^ -o $@
+# dhrystone needs c89
+DHRYCFLAGS := -std=gnu89
 
-# Target ELF
+# DHRYOBJS -> dhrystone
+DHRYOBJS := $(patsubst $(CWD)/%.c,$(OUTPATH)/%.o,$(DHRYSRCS))
+# add to main obj dependecies
+OBJS += $(DHRYOBJS)
+# DHRYOBJS target
+$(OUTPATH)/%.o: $(CWD)/%.c
+	@mkdir -p $(dir $@)
+	$(CC) $(CPPFLAGS) $(CFLAGS) $(DHRYCFLAGS) -c $< -o $@
+
+# MAIN Target ELF
 TARGET := $(OUTPATH)/dhrystone.elf
 
-# Build the ELF
-$(TARGET): $(SRCS) $(DHRYTARGET)
+# MAIN TARGET
+$(TARGET): $(OBJS)
 	@mkdir -p $(OUTPATH)
 	$(CC) $(CPPFLAGS) $(CFLAGS) $(LDFLAGS) $^ $(LDLIBS) -o $@
 

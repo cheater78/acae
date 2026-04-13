@@ -33,15 +33,14 @@ void free(void* p) {
 }
 // sys/times.h
 clock_t times(struct tms *buffer) {
-    const clock_t utime = DWT_CYCCNT / (F_CPU / 1000000UL); // time as µs from clk cycles
     if (buffer) {
-        buffer->tms_utime  = utime;
+        buffer->tms_utime  = dwt_cyccnt();
         buffer->tms_stime  = 0;
         buffer->tms_cutime = 0;
         buffer->tms_cstime = 0;
     }
-
-    return utime;
+    printf("std/times: %lu ticks\n", buffer->tms_utime);
+    return buffer->tms_utime;
 }
 
 // custom helpers
@@ -54,4 +53,8 @@ unsigned long tick_diff(unsigned long start, unsigned long end, unsigned long ti
 }
 unsigned long tick_diff_u32(unsigned long start, unsigned long end) {
     return tick_diff(start, end, 0xFFFFFFFF);
+}
+
+unsigned long ticks_to_us(unsigned long ticks) {
+    return ticks / (HZ / MICS_PER_SECOND); 
 }

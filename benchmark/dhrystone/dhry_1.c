@@ -45,7 +45,7 @@ Enumeration     Func_1 ();
 
 #ifdef TIMES
 struct tms      time_info;
-// EDIT(modern clib doesn't have times(void)) extern  int     times ();
+// EDIT(modern clib doesn't have times(void)) -> provided by bmstdlib //extern  int     times ();
                 /* see library function "times" */
 #define Too_Small_Time 120
                 /* Measurements should last at least about 2 seconds */
@@ -271,6 +271,13 @@ main ()
     printf ("Dhrystones per Second:                      ");
     printf ("%f \n", Dhrystones_Per_Second);
     printf ("\n");
+    // EDIT
+    static const unsigned long baseline = 1757; // VAX 11/780 baseline mesurement(at 1 MIPS), from the ancient times
+    const double DMIPS = (double)Dhrystones_Per_Second / (double)baseline;
+    const double DMIPS_Per_MHz = DMIPS / (HZ / MICS_PER_SECOND);
+    printf("DMIPS: %f\n", DMIPS);
+    printf("DMIPS/MHz: %f\n", DMIPS_Per_MHz);
+    // ~EDIT
   }
   
 }

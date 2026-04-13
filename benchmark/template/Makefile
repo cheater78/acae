@@ -3,45 +3,42 @@ BENCHPATH := $(abspath $(CWD)/..)
 ACAEPATH  := $(abspath $(BENCHPATH)/..)
 
 BMPATH   := $(ACAEPATH)/baremetal
+BOOTPATH := $(BMPATH)/boot
 OUTPATH  := $(CWD)/bin
 
-# Compiler and flags
-CC := arm-none-eabi-gcc
+# boot - defines the entrypoint
+include $(BOOTPATH)/boot.mk
+
 # preproc
 CPPFLAGS += -I$(CWD)
-CFLAGS += \
-	-mcpu=cortex-m4 \
-	-mthumb \
-	\
-	-mfloat-abi=soft \
-	-ffreestanding \
-	-nostartfiles \
-	-fno-unwind-tables \
-	-fno-exceptions \
-	-fno-asynchronous-unwind-tables \
-	-fomit-frame-pointer \
-	-specs=nosys.specs \
-	-specs=nano.specs\
-	\
-	-g \
-	-O0
+CFLAGS += -g0 -O0
 # LDFLAGS +=
 # LDLIBS +=
 
 # Source files
-SRCS += $(shell find $(CWD) -name '*.c')
+TEMPSRCS += $(shell find $(CWD) -name '*.c')
 vpath .c $(CWD)
 
 include $(BMPATH)/baremetal.mk
 
+# TEMPOBJS -> template
+TEMPOBJS := $(patsubst $(CWD)/%.c,$(OUTPATH)/%.o,$(TEMPSRCS))
+# add to main obj dependecies
+OBJS += $(TEMPOBJS)
+# TEMPOBJS target
+$(OUTPATH)/%.o: $(CWD)/%.c
+	@mkdir -p $(dir $@)
+	$(CC) $(CPPFLAGS) $(CFLAGS) -c $< -o $@
+
 # Target ELF
 TARGET := $(OUTPATH)/template.elf
 
-# Build the ELF
-$(TARGET): $(SRCS)
+# MAIN TARGET
+$(TARGET): $(OBJS)
 	@mkdir -p $(OUTPATH)
 	$(CC) $(CPPFLAGS) $(CFLAGS) $(LDFLAGS) $^ $(LDLIBS) -o $@
 
+# Phony targets
 .PHONY: all clean
 all: $(TARGET)
 clean:

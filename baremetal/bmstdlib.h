@@ -14,7 +14,7 @@ void* malloc(unsigned long size);
 void free(void* p);
 
 // sys/times.h
-#define HZ 1
+#define HZ F_CPU
 typedef unsigned long clock_t;
 struct tms {
     clock_t tms_utime;		/* User CPU time.  */
@@ -29,3 +29,5 @@ clock_t times(struct tms* buffer);
 unsigned long tick_diff(unsigned long start, unsigned long end, unsigned long tick_max);
 unsigned long tick_diff_u32(unsigned long start, unsigned long end);
 
+#define MICS_PER_SECOND 1000000UL
+unsigned long ticks_to_us(unsigned long ticks);
