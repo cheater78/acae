@@ -1,18 +1,21 @@
 # Directories
 CWD := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))
 BENCHPATH := $(abspath $(CWD)/..)
-BMPATH   := $(BENCHPATH)/bmlib
+ACAEPATH  := $(abspath $(BENCHPATH)/..)
+
+BMPATH   := $(ACAEPATH)/baremetal
 OUTPATH  := $(CWD)/bin
 
 # Compiler and flags
 CC := arm-none-eabi-gcc
-CFLAGS := \
+# preproc
+CPPFLAGS += -I$(CWD)
+CFLAGS += \
 	-mcpu=cortex-m4 \
 	-mthumb \
 	\
 	-mfloat-abi=soft \
 	-ffreestanding \
-	-nostartfiles \
 	-fno-unwind-tables \
 	-fno-exceptions \
 	-fno-asynchronous-unwind-tables \
@@ -20,36 +23,29 @@ CFLAGS := \
 	-specs=nosys.specs \
 	-specs=nano.specs\
 	\
-	-std=gnu89 \
 	-g0 \
 	-O0
-INCLUDES := -I$(CWD) -I$(BMPATH)
-LDFLAGS := -T $(BMPATH)/link.ld
+# LDFLAGS +=
+# LDLIBS +=
 
 # Source files
-BMSRCS := $(shell find $(BMPATH) -name '*.c')
-SRCS := $(shell find $(CWD) -name '*.c') $(BMSRCS)
+DHRYSRCS += $(shell find $(CWD) -name '*.c')
+vpath .c $(CWD)
 
-# Or if you want to be explicit
-# BMSRCS := \
-# 	boot/boot.c \
-# 	boot/handlers.c \
-# 	boot/stack.c \
-# 	syscall_stubs.c
-# SRCS := main.c $(addprefix $(BMPATH)/,$(BMSRCS))
+include $(BMPATH)/baremetal.mk
+
+DHRYTARGET := $(OUTPATH)/dhrystone.o
+$(DHRYTARGET): $(DHRYSRCS)
+	@mkdir -p $(OUTPATH)
+	$(CC) $(CPPFLAGS) -std=gnu89 $(CFLAGS) $^ -o $@
 
 # Target ELF
 TARGET := $(OUTPATH)/dhrystone.elf
 
-# if you ever need objs
-# OBJS := $(addprefix $(OUTPATH)/,$(notdir $(SRCS:.c=.o)))
-# $(OUTPATH)/%.o : %.c
-#	$(CC) $(CFLAGS) $(XCFLAGS) $(COUT) $< $(OBJOUT) $@
-
 # Build the ELF
-$(TARGET): $(SRCS)
+$(TARGET): $(SRCS) $(DHRYTARGET)
 	@mkdir -p $(OUTPATH)
-	$(CC) $(CFLAGS) $(INCLUDES) $^ $(LDFLAGS) -o $@
+	$(CC) $(CPPFLAGS) $(CFLAGS) $(LDFLAGS) $^ $(LDLIBS) -o $@
 
 # Phony targets
 .PHONY: all clean

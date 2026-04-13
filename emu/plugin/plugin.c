@@ -3,14 +3,15 @@
 
 #include "cyc_acc.h"
 #include "log.h"
-#include "platform.h"
+#include "dwt.h"
+
 
 QEMU_PLUGIN_EXPORT int qemu_plugin_version = QEMU_PLUGIN_VERSION;
 
 static void cb_insn_exec(unsigned int vcpu, void* insn_index) {
     ca_rt_insn_exec_cb(vcpu, insn_index);
 
-    // TODO: the only performance improvement: prefilter mem access (from manual insn decode) at tb trans
+    // TODO: the only possible performance improvement: prefilter mem access (from manual insn decode) at tb trans
     GByteArray cyc_value = {
         (guint8*)ca_rt_get_total_cycles_mem(),
         (guint)4U
@@ -29,9 +30,19 @@ static void cb_tb_trans(qemu_plugin_id_t id, struct qemu_plugin_tb* tb) {
 
         void* userdata = ca_rt_add_insn(pc, opcode);
         
+        qemu_plugin_vcpu_udata_cb_t insn_exec_cb = ca_rt_insn_exec_cb;
+        if ((opcode & 0xF800) == 0x6800) { // LDR
+            static const char* cyc_sym = "dwt_cyccnt";
+            const char* sym = qemu_plugin_insn_symbol(insn);
+            if(strcmp(sym, cyc_sym) == 0) { // ONLY WORKS WITH -O0 !!!!!!!!!!
+                pllog("instr trans: sym: %s\n", sym);
+                insn_exec_cb = cb_insn_exec;
+            }
+            
+        }
         qemu_plugin_register_vcpu_insn_exec_cb(
             insn,
-            cb_insn_exec,
+            insn_exec_cb,
             QEMU_PLUGIN_CB_NO_REGS,
             userdata);
     }

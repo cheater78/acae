@@ -14,6 +14,7 @@ void* malloc(unsigned long size);
 void free(void* p);
 
 // sys/times.h
+#define HZ 1
 typedef unsigned long clock_t;
 struct tms {
     clock_t tms_utime;		/* User CPU time.  */

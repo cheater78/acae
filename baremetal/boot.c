@@ -1,5 +1,4 @@
 #include "boot.h"
-#include "platform.h"
 #include "printf.h"
 
 extern int main();
@@ -26,7 +25,7 @@ void RESET_handler() {
     main();
     printf("Benchmark finished!\n");
     boot_call_fini_array();
-    // shut down - qemu specific
+    // shut down
     exit(0);
 }
 

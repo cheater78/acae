@@ -348,8 +348,7 @@
 /* Compiler and system dependent definitions: */
 
 // EDIT
-#define HZ 1
-#include "stdlib.h"
+#include "bmstdlib.h"
 #define ITERATIONS 128
 //~EDIT!
 

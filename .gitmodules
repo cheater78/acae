@@ -7,3 +7,6 @@
 [submodule "benchmark/embench/embench"]
 	path = benchmark/embench/embench
 	url = https://github.com/embench/embench-iot.git
+[submodule "baremetal/printf"]
+	path = baremetal/printf
+	url = https://github.com/mpaland/printf.git

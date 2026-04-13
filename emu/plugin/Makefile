@@ -4,11 +4,12 @@ ACAEPATH  := $(abspath $(EMUPATH)/..)
 
 QEMUPATH  := $(EMUPATH)/qemu
 BMPATH   := $(ACAEPATH)/baremetal
+BMQEMUPATH := $(BMPATH)/qemu
 OUTPATH   := $(PLUGINPATH)/bin
 
 # Compiler and flags
 CC := cc
-CFLAGS := -O2 -fPIC -I$(QEMUPATH)/include -I$(QEMUPATH)/build $(shell pkg-config --cflags glib-2.0) -I$(BMPATH)
+CFLAGS := -O2 -fPIC -I$(QEMUPATH)/include -I$(QEMUPATH)/build -I$(BMPATH) -I$(BMQEMUPATH) $(shell pkg-config --cflags glib-2.0) -I$(BMPATH)
 LDFLAGS := $(shell pkg-config --libs glib-2.0)
 
 # Files

@@ -8,10 +8,11 @@ COREMARKBMPATH := $(COREMARKPATH)/barebones
 BMPATH   := $(ACAEPATH)/baremetal
 OUTPATH  := $(CWD)/bin
 
-
 # Compiler and flags
 CC := arm-none-eabi-gcc
-CFLAGS := \
+# preproc
+CPPFLAGS += -I$(COREMARKPATH) -I$(COREMARKBMPATH) -DFLAGS_STR="\"$(CFLAGS)\""
+CFLAGS += \
 	-mcpu=cortex-m4 \
 	-mthumb \
 	\
@@ -25,19 +26,19 @@ CFLAGS := \
 	-specs=nano.specs\
 	\
 	-g \
-	-O2
-INCLUDES := -I$(COREMARKPATH) -I$(COREMARKBMPATH) -I$(BMPATH)
-LDFLAGS := -T $(BMPATH)/link.ld
+	-O0
+# LDFLAGS +=
+# LDLIBS +=
 
 # Source files
-vpath .c $(COREMARKPATH) $(COREMARKBMPATH) $(BMPATH)
-BMSRCS := $(shell find $(BMPATH) -name '*.c')
 COREMARKSRCS := core_list_join.c core_main.c core_matrix.c core_state.c core_util.c
 COREMARKBMSRCS := core_portme.c
-SRCS := \
+SRCS += \
 	$(addprefix $(COREMARKPATH)/,$(COREMARKSRCS)) \
-	$(addprefix $(COREMARKBMPATH)/,$(COREMARKBMSRCS)) \
-	$(BMSRCS)
+	$(addprefix $(COREMARKBMPATH)/,$(COREMARKBMSRCS))
+vpath .c $(COREMARKPATH) $(COREMARKBMPATH)
+
+include $(BMPATH)/baremetal.mk
 
 # Target ELF
 TARGET := $(OUTPATH)/coremark.elf
@@ -45,7 +46,7 @@ TARGET := $(OUTPATH)/coremark.elf
 # Build the ELF
 $(TARGET): $(SRCS)
 	@mkdir -p $(OUTPATH)
-	$(CC) $(CFLAGS) $(INCLUDES) $^ $(LDFLAGS) -DFLAGS_STR="\"$(CFLAGS)\"" -o $@
+	$(CC) $(CPPFLAGS) $(CFLAGS) $(LDFLAGS) $^ $(LDLIBS) -o $@
 
 # Phony targets
 .PHONY: all clean

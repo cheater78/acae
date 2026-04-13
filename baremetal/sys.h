@@ -62,17 +62,4 @@ static inline void exit(int status) {
     _exit(status);
 }
 
-// platform environment
-#include "platform.h"
-
-// DWT
-static inline void init_dwt() {
-    DWT_ENABLE;
-    DWT_LAR = 0xC5ACCE55; // unlock DWT (not needed for qemu, but required for real hardware)
-    DWT_CYCCNT = 0;
-    DWT_CTRL = 1;
-}
-
-static inline unsigned long dwt_cyccnt() {
-    return DWT_CYCCNT;
-}
+#include "dwt.h"

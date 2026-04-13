@@ -6,6 +6,7 @@ void benchmark_run() {
 
     for(unsigned int i = 0; i < BENCH_ITER; i++) {
         // just using the loop as load
+        volatile unsigned int suppress_opt = i;
     }
 
     volatile unsigned long end_cycles = dwt_cyccnt();
@@ -20,7 +21,13 @@ int main(void) {
     printf("Hello from our Benchmark template!\n");
     printf("dec: %ld\n", 1234567890UL);
     printf("hex: %#08lx\n", 0xF0A9);
-    printf("float: %06.3f\n", -123.321f); // front padding not working
+
+    const double my_float = 54321.12345f;
+    printf("05.5f: %05.5f\n", my_float);
+    printf("6.3f: %6.3f\n", my_float);
+    printf("0.5f: %0.5f\n", my_float);
+    printf("05.f: %05.f\n", my_float);
+    printf("0f: %0f\n", my_float);
     
     benchmark_run();
 
