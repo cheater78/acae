@@ -2,8 +2,8 @@ ENTRY(RESET_handler)
 
 MEMORY
 {
-    FLASH(rx) : ORIGIN = 0x00000000, LENGTH = 512K
-    SRAM(rw) : ORIGIN = 0x20000000, LENGTH = 64K
+    FLASH(rx) : ORIGIN = 0x08000000, LENGTH = 512K /* STM32F411 requires flash at 0x08000000 */
+    SRAM(rw) : ORIGIN = 0x20000000, LENGTH = 128K /* STM32F411 for validation has 128K */
 }
 
 SECTIONS
