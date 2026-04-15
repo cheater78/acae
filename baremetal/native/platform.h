@@ -7,26 +7,39 @@
 #define F_CPU 100000000UL
 
 // DWT (CYCNT)
-#ifdef PLATFORM_QEMU
-    // no enbling needed for QEMU, it's always on and mapped at _DWT_ADDR_QEMU_BASE
-    #define DWT_ENABLE
-#elif defined(PLATFORM_NATIVE)
-    // on native, we need to enable the DWT unit
-    #define SCB_DEMCR   *(volatile unsigned int*) 0xE000EDFC
-    #define DWT_ENABLE SCB_DEMCR |= 0x01000000
-#endif
+// on native, we need to enable the DWT unit
+#define SCB_DEMCR   *(volatile unsigned int*) 0xE000EDFC
+#define DWT_ENABLE SCB_DEMCR |= 0x01000000
 
-#define _DWT_ADDR_SPACE_SIZE 0x1000
-#define _DWT_ADDR_NATIVE_BASE 0xE0001000
-#define _DWT_ADDR_QEMU_BASE 0x40000000
+#define _DWT_BASE_MEM_ADDR 0xE0001000
 
-#define _DWT_BASE_MEM_ADDR _DWT_ADDR_QEMU_BASE
+//TODO: coarse template for now, impl properly for native
+void clock_init(void) {
+    // Enable HSE (external 25 MHz crystal)
+    RCC->CR |= (1 << 16);
+    while (!(RCC->CR & (1 << 17))); // wait HSERDY
 
-#define DWT_ADDR_CTRL       (_DWT_BASE_MEM_ADDR + 0x000)
-#define DWT_ADDR_CYCCNT     (_DWT_BASE_MEM_ADDR + 0x004)
-#define DWT_ADDR_LAR        (_DWT_BASE_MEM_ADDR + 0xFB0)
+    // Configure FLASH latency (3 wait states for ~100 MHz)
+    volatile uint32_t *FLASH_ACR = (uint32_t*)(FLASH_BASE + 0x00);
+    *FLASH_ACR = (3 << 0) | (1 << 8) | (1 << 9); // latency + cache
 
-// dwt registers
-#define DWT_CTRL    *(volatile unsigned long*) DWT_ADDR_CTRL
-#define DWT_CYCCNT  *(volatile unsigned long*) DWT_ADDR_CYCCNT
-#define DWT_LAR     *(volatile unsigned long*) DWT_ADDR_LAR
+    // PLL config:
+    // PLLM = 25
+    // PLLN = 192
+    // PLLP = 2  → 96 MHz SYSCLK
+    // PLLQ = 4  → 48 MHz USB
+    RCC->PLLCFGR =
+        (25 << 0) |        // PLLM
+        (192 << 6) |       // PLLN
+        (0 << 16) |        // PLLP = 2
+        (1 << 22) |        // HSE as source
+        (4 << 24);         // PLLQ
+
+    // Enable PLL
+    RCC->CR |= (1 << 24);
+    while (!(RCC->CR & (1 << 25))); // PLLRDY
+
+    // Switch SYSCLK to PLL
+    RCC->CFGR |= (2 << 0);
+    while (((RCC->CFGR >> 2) & 3) != 2);
+}
