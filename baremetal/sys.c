@@ -1,11 +1,17 @@
 #include "sys.h"
-#include "semihosting.h"
 
 #include <errno.h>
 #include <stddef.h>
 #include <sys/reent.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+
+extern void _putchar(char character);
+
+// defined by platform
+extern void _exit(int status);
+extern ssize_t _write(int fd, const void *buf, size_t len);
+extern ssize_t _read(int fd, void *buf, size_t len);
 
 static byte* __heap_end__ = 0;
 
@@ -27,43 +33,12 @@ void* _sbrk(ptrdiff_t incr) {
     return prev;
 }
 
-ssize_t _write(int fd, const void *buf, size_t len){
-    if (fd == 1 || fd == 2) {
-        const char *c = buf;
-        size_t i = 0; // c89
-        for(; i < len; i++) {
-            semihost_call(SEMI_SYS_WRITEC, (void*)&c[i]);
-        }
-        return len;
-    }
-    return -1;
-}
-
 ssize_t _write_r(struct _reent *r, int fd, const void *buf, size_t len) {
     if (fd != 1 && fd != 2) {
         r->_errno = EBADF;
         return -1;
     }
     return _write(fd, buf, len);
-}
-
-/*
-    Semihosting readline, returns on \r or buf_len only
-    meant for user input 
-*/
-ssize_t _read(int fd, void *buf, size_t len){
-    if (fd != 0)
-        return -1;
-    char *cbuf = buf;
-    size_t i = 0;
-
-    while (i < len) {
-        int ch = semihost_call(SEMI_SYS_READC, NULL);
-        if (ch == '\r') ch = '\n';  // normalize CR to LF
-        cbuf[i++] = ch & 0xFF;
-        if (ch == '\n') break;      // stop at newline
-    }
-    return i;
 }
 
 ssize_t _read_r(struct _reent *r, int fd, void *buf, size_t len) {
@@ -97,10 +72,6 @@ int _isatty(int file) {
 }
 int _isatty_r(struct _reent *r, int fd) { (void)r; return _isatty(fd); }
 
-__attribute__((noreturn))
-void _exit(int status)  {
-    semihost_exit_ext(status);
-}
 
 int _kill(int pid, int sig) {
     errno = EINVAL;

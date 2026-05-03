@@ -2,15 +2,15 @@ CWD := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))
 BENCHPATH := $(abspath $(CWD)/..)
 ACAEPATH  := $(abspath $(BENCHPATH)/..)
 
-BMPATH   := $(ACAEPATH)/baremetal
-BOOTPATH := $(BMPATH)/boot
 OUTPATH  := $(CWD)/bin
 
-# boot - defines the entrypoint
-include $(BOOTPATH)/boot.mk
+include $(ACAEPATH)/baremetal/baremetal.mk
 
 # preproc
 CPPFLAGS += -I$(CWD)
+ifdef ITERATIONS
+CPPFLAGS += -DITERATIONS=$(ITERATIONS)
+endif
 CFLAGS += -g0 -O0
 # LDFLAGS +=
 # LDLIBS +=
@@ -18,8 +18,6 @@ CFLAGS += -g0 -O0
 # Source files
 TEMPSRCS += $(shell find $(CWD) -name '*.c')
 vpath .c $(CWD)
-
-include $(BMPATH)/baremetal.mk
 
 # TEMPOBJS -> template
 TEMPOBJS := $(patsubst $(CWD)/%.c,$(OUTPATH)/%.o,$(TEMPSRCS))
@@ -38,8 +36,14 @@ $(TARGET): $(OBJS)
 	@mkdir -p $(OUTPATH)
 	$(CC) $(CPPFLAGS) $(CFLAGS) $(LDFLAGS) $^ $(LDLIBS) -o $@
 
+$(TARGET:.elf=.bin): $(TARGET)
+	$(OBJCOPY) -O binary $< $@
+
 # Phony targets
-.PHONY: all clean
+.PHONY: all clean flash
 all: $(TARGET)
 clean:
 	rm -rf $(OUTPATH)
+flash: $(TARGET:.elf=.bin)
+	dfu-util -a 0 -s 0x08000000:leave -D $<
+	

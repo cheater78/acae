@@ -20,7 +20,11 @@ void benchmark_run() {
 int main(void) {
     printf("Hello from our Benchmark template!\n");
     
-    benchmark_run();
+    platform_init();
+    while (1) {
+        LL_GPIO_TogglePin(GPIOC, LL_GPIO_PIN_13);
+        for (volatile int i = 0; i < 1000000; i++);
+    }
 
     return 0;
 }

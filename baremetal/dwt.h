@@ -1,7 +1,7 @@
 #pragma once
 
 // platform environment
-#include "platform.h"
+#include <platform.h>
 
 #define _DWT_ADDR_SPACE_SIZE 0x1000
 

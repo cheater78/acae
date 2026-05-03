@@ -12,6 +12,9 @@ include $(BOOTPATH)/boot.mk
 
 # preproc
 CPPFLAGS += -I$(CWD)
+ifdef ITERATIONS
+CPPFLAGS += -DITERATIONS=$(ITERATIONS)
+endif
 CFLAGS += -g0 -O0
 # LDFLAGS +=
 # LDLIBS +=

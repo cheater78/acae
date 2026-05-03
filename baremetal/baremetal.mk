@@ -1,32 +1,56 @@
+# all make paths for baremetal are to be defined here ONCE
 BAREMETALPATH := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))
-ACAEPATH  := $(abspath $(BAREMETALPATH)/..)
+
 BOOTPATH := $(BAREMETALPATH)/boot
 
-BMQEMUPATH := $(BAREMETALPATH)/qemu
-BMNATIVEPATH := $(BAREMETALPATH)/native
+BMPLATFORMBASEPATH := $(BAREMETALPATH)/platform
+BMQEMUPATH := $(BMPLATFORMBASEPATH)/qemu
+BMNATIVEPATH := $(BMPLATFORMBASEPATH)/native
 
 BMPRINTFPATH := $(BAREMETALPATH)/printf
 
 BMOUTPATH  := $(BAREMETALPATH)/bin
 
+# Platform - default to qemu
+V ?= 0
+ifeq ($(V),1)
+    BMPLATFORMPATH := $(BMNATIVEPATH)
+else
+    BMPLATFORMPATH := $(BMQEMUPATH)
+endif
+
 BMLIBCPPFLAGS := \
 	-I$(BAREMETALPATH) \
-	-I$(BMPRINTFPATH) \
-	-I$(BMQEMUPATH)
-# add to main prepoc flags
+	-I$(BMPRINTFPATH)
+
+CC := arm-none-eabi-gcc
+OBJCOPY := arm-none-eabi-objcopy
 CPPFLAGS += $(BMLIBCPPFLAGS)
-# CFLAGS += # core defined in boot, optimization etc. defined in benchmark
-# LDFLAGS +=
+# optimization etc. defined in benchmark
+CFLAGS += \
+	-mcpu=cortex-m4 \
+	-mthumb \
+	\
+	-mfloat-abi=soft \
+	-ffreestanding \
+	-fno-unwind-tables \
+	-fno-exceptions \
+	-fno-asynchronous-unwind-tables \
+	-fomit-frame-pointer \
+	-specs=nosys.specs \
+	-specs=nano.specs
+# LDFLAGS += # platform dependend
 # LDLIBS +=
 
-BMLIBSRCS := \
-	$(shell find $(BAREMETALPATH) -name '*.c' -not -path '$(BOOTPATH)/*') \
-	$(shell find $(BMPRINTFPATH) -name '*.c') \
-	$(shell find $(BMQEMUPATH) -name '*.c')
-vpath .c $(BAREMETALPATH) $(BMPRINTFPATH) $(BMQEMUPATH)
+BMLIBSRCS += \
+	$(shell find $(BAREMETALPATH) -name '*.c' -not -path '$(BOOTPATH)/*' -not -path '$(BMPLATFORMBASEPATH)/*')
+vpath .c $(BAREMETALPATH) $(BMPRINTFPATH)
+
+include $(BOOTPATH)/boot.mk
+include $(BMPLATFORMPATH)/platform.mk
 
 # BMLIBOBJS -> sys, dwt, stdlib, printf, _printchar
-BMLIBOBJS := $(patsubst $(BAREMETALPATH)/%.c,$(BMOUTPATH)/%.o,$(BMLIBSRCS))
+BMLIBOBJS += $(patsubst $(BAREMETALPATH)/%.c,$(BMOUTPATH)/%.o,$(BMLIBSRCS))
 # add to main obj dependecies
 OBJS += $(BMLIBOBJS)
 # BMLIBOBJS target
