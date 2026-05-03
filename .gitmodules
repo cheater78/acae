@@ -13,3 +13,6 @@
 [submodule "baremetal/native/STM32CubeF4"]
 	path = baremetal/native/STM32CubeF4
 	url = https://github.com/STMicroelectronics/STM32CubeF4.git
+[submodule "baremetal/platform/native/STM32CubeF4"]
+	path = baremetal/platform/native/STM32CubeF4
+	url = https://github.com/STMicroelectronics/STM32CubeF4.git

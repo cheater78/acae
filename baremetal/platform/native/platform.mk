@@ -1,0 +1,50 @@
+# vars defined in baremetal.mk
+
+LIBSTM32CUBEF4 := $(BMNATIVEPATH)/STM32CubeF4
+LIBCOREPATH := $(LIBSTM32CUBEF4)/Drivers/CMSIS
+LIBDEVICEPATH := $(LIBSTM32CUBEF4)/Drivers/CMSIS/Device/ST/STM32F4xx
+LIBHALLLPATH := $(LIBSTM32CUBEF4)/Drivers/STM32F4xx_HAL_Driver
+
+LIBUSBCONFIGPATH := $(BMNATIVEPATH)/usb
+LIBUSBPATH := $(LIBSTM32CUBEF4)/Middlewares/ST/STM32_USB_Device_Library/
+LIBUSBCOREPATH := $(LIBSTM32CUBEF4)/Core
+LIBUSBCDCPATH := $(LIBSTM32CUBEF4)/Class/CDC
+
+BMLIBCPPFLAGS += \
+	-I$(BMNATIVEPATH) \
+	-I$(LIBCOREPATH)/Include \
+	-I$(LIBDEVICEPATH)/Include \
+	-I$(LIBHALLLPATH)/Inc \
+	\
+	-I$(LIBUSBCONFIGPATH) \
+	-I$(LIBUSBCOREPATH)/Inc \
+	-I$(LIBUSBCDCPATH)/Inc \
+	\
+	-DSTM32F411xE \
+  	-DUSE_FULL_LL_DRIVER \
+	-DUSBD_USE_CDC
+
+BMLIBSRCS += \
+	$(shell find $(BMNATIVEPATH) -name '*.c' -not -path '$(LIBSTM32CUBEF4)/*') \
+	$(LIBDEVICEPATH)/Source/Templates/system_stm32f4xx.c \
+	\
+	$(LIBHALLLPATH)/Src/stm32f4xx_ll_usb.c \
+	$(LIBHALLLPATH)/Src/stm32f4xx_hal_pcd.c \
+	$(LIBHALLLPATH)/Src/stm32f4xx_hal_pcd_ex.c \
+	\
+	$(LIBUSBCOREPATH)/Src/usbd_core.c \
+	$(LIBUSBCOREPATH)/Src/usbd_ctlreq.c \
+	$(LIBUSBCOREPATH)/Src/usbd_ioreq.c \
+	\
+	$(LIBUSBCDCPATH)/Src/usbd_cdc.c \
+	\
+	$(LIBUSBCONFIGPATH)/usbd_conf.c \
+	$(LIBUSBCONFIGPATH)/usbd_desc.c \
+	$(LIBUSBCONFIGPATH)/usbd_cdc_if.c
+
+
+
+
+LDFLAGS += -L$(BMNATIVEPATH) -T$(BMNATIVEPATH)/link.ld
+
+vpath .c $(BMNATIVEPATH)
