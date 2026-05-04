@@ -57,10 +57,11 @@ extern long     time();
                 /* Measurements should last at least 2 seconds */
 #endif
 
-long            Begin_Time,
+// EDIT: changed long -> ulong, float -> double
+unsigned long   Begin_Time,
                 End_Time,
                 User_Time;
-float           Microseconds,
+double          Microseconds,
                 Dhrystones_Per_Second;
 
 /* end of variables for time measurement */
@@ -248,7 +249,11 @@ main ()
 
   User_Time = End_Time - Begin_Time;
 
-  if (User_Time < Too_Small_Time)
+  //EDIT - In case time is <Too_Small_Time, I wanna know how much, and if not it still doesnt hurt 
+  printf("Cycles: start: %lu, stop: %lu, passed: %lu\n", Begin_Time, End_Time, User_Time);
+  //~EDIT
+
+  if (User_Time < Too_Small_Time && !ALLOW_INVALID_RUNS) //EDIT: ALLOW_INVALID_RUNS := {0,1}
   {
     printf ("Measured time too small to obtain meaningful results\n");
     printf ("Please increase number of runs\n");
@@ -256,15 +261,15 @@ main ()
   }
   else
   {
-#ifdef TIME
-    Microseconds = (float) User_Time * Mic_secs_Per_Second 
-                        / (float) Number_Of_Runs;
-    Dhrystones_Per_Second = (float) Number_Of_Runs / (float) User_Time;
+#ifdef TIME // EDIT: changed float -> double
+    Microseconds = (double) User_Time * Mic_secs_Per_Second 
+                        / (double) Number_Of_Runs;
+    Dhrystones_Per_Second = (double) Number_Of_Runs / (double) User_Time;
 #else
-    Microseconds = (float) User_Time * Mic_secs_Per_Second 
-                        / ((float) HZ * ((float) Number_Of_Runs));
-    Dhrystones_Per_Second = ((float) HZ * (float) Number_Of_Runs)
-                        / (float) User_Time;
+    Microseconds = (double) User_Time * Mic_secs_Per_Second 
+                        / ((double) HZ * ((double) Number_Of_Runs));
+    Dhrystones_Per_Second = ((double) HZ * (double) Number_Of_Runs)
+                        / (double) User_Time;
 #endif
     printf ("Microseconds for one run through Dhrystone: ");
     printf ("%f \n", Microseconds);

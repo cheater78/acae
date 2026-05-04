@@ -39,3 +39,8 @@ ssize_t _read(int fd, void *buf, size_t len){
     }
     return i;
 }
+
+void platform_preinit() { }
+void platform_init() {
+    // no setup on qemu for now
+}

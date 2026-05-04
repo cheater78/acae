@@ -30,4 +30,7 @@ unsigned long tick_diff(unsigned long start, unsigned long end, unsigned long ti
 unsigned long tick_diff_u32(unsigned long start, unsigned long end);
 
 #define MICS_PER_SECOND 1000000UL
+#define NANOS_PER_SECOND 1000000000UL
+#define TICKS_TO_TIME(ticks, RES) ((HZ > RES) ? ticks / (HZ / RES) : ticks * (RES / HZ))
 unsigned long ticks_to_us(unsigned long ticks);
+unsigned long ticks_to_ns(unsigned long ticks);

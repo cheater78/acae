@@ -9,23 +9,26 @@ void pllog_init(const char *path, bool overwrite) {
         fclose(log_file);
     }
 
-    log_file = fopen(path, overwrite ? "w" : "a");
-    if (!log_file) {
-        // fallback: optionally handle error
-        perror("pllog_init: log file open failed!");
+    if (USE_QEMU_CA_PLUGIN_DEBUG_LOG) {
+        log_file = fopen(path, overwrite ? "w" : "a");
+        if (!log_file) {
+            // fallback: optionally handle error
+            perror("pllog_init: log file open failed!");
+        }
     }
 }
 
 void pllog_fini(void) {
-    if (log_file) {
-        fclose(log_file);
-        log_file = NULL;
+    if (!log_file) {
+        return;
     }
+    fclose(log_file);
+    log_file = NULL;
 }
 
 void pllog(const char *fmt, ...) {
     if (!log_file) {
-        perror("pllog: log file not initialized!");
+        return;
     }
 
     va_list args;

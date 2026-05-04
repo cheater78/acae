@@ -4,7 +4,7 @@ ACAEPATH  := $(abspath $(EMUPATH)/..)
 
 QEMUPATH  := $(EMUPATH)/qemu
 BMPATH   := $(ACAEPATH)/baremetal
-BMQEMUPATH := $(BMPATH)/qemu
+BMQEMUPATH := $(BMPATH)/platform/qemu
 OUTPATH   := $(PLUGINPATH)/bin
 
 # Compiler and flags

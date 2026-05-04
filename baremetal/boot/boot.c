@@ -4,26 +4,31 @@
 extern int main();
 
 void RESET_handler() {
-    printf("ISP: %#x\n", __stack_top__);
-
+    platform_preinit();
+    // boot
     boot_copy_data();
     boot_zero_bss();
     boot_heap_init();
     boot_call_init_array();
+    //~boot
 
+    platform_init();
     init_dwt();
 
     // Boot setup complete
+    printf("\n\n"); // make some space to the potential previous garbage
+    printf("ISP: %#x\n", __stack_top__);
     printf("MSP: %#x\n", get_msp());
     printf("Flash: begin: 0x%#x, used: 0x%#x / 0x%x\n", __flash_start__, __flash_end__ - __flash_start__, __flash_size__);
     printf("SRAM: begin: 0x%#x, size: 0x%#x\n", __sram_start__, __sram_size__);
     printf("SRAM used: 0x%#x, available: 0x%#x\n", __heap_start__ - __sram_start__, __stack_top__ - __heap_start__);
     printf("HEAP at: 0x%#x, STACK at: 0x%#x\n", __heap_start__, __stack_top__);
     
-    printf("Running Main\n");
+    printf("Entering Main\n");
     // run application
     main();
-    printf("Benchmark finished!\n");
+    printf("Finished Main!\n");
+    printf("EXIT\n");
     boot_call_fini_array();
     // shut down
     exit(0);

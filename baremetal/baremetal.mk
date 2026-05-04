@@ -12,10 +12,10 @@ BMPRINTFPATH := $(BAREMETALPATH)/printf
 BMOUTPATH  := $(BAREMETALPATH)/bin
 
 # Platform - default to qemu
-V ?= 0
-ifeq ($(V),1)
+PLATFORM ?= acae
+ifeq ($(PLATFORM),native)
     BMPLATFORMPATH := $(BMNATIVEPATH)
-else
+else ifeq ($(PLATFORM),acae)
     BMPLATFORMPATH := $(BMQEMUPATH)
 endif
 

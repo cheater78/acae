@@ -1,6 +1,5 @@
 #include "bmstdlib.h"
 #include "sys.h"
-#include <stddef.h>
 // STD LIB replacements
 // string.h
 char* strcpy(char *dest, const char *src) {
@@ -33,14 +32,16 @@ void free(void* p) {
 }
 // sys/times.h
 clock_t times(struct tms *buffer) {
+    volatile unsigned long ticks = dwt_cyccnt(); // volatile, vanishes(=0) in dhry else
     if (buffer) {
-        buffer->tms_utime  = dwt_cyccnt();
+        buffer->tms_utime  = ticks;
         buffer->tms_stime  = 0;
         buffer->tms_cutime = 0;
         buffer->tms_cstime = 0;
     }
-    // printf("std/times: %lu ticks\n", buffer->tms_utime);
-    return buffer->tms_utime;
+    //printf("dwt: %lu ticks\n", ticks);
+    //printf("std/times: %lu ticks\n", buffer->tms_utime);
+    return ticks;
 }
 
 // custom helpers
@@ -56,5 +57,8 @@ unsigned long tick_diff_u32(unsigned long start, unsigned long end) {
 }
 
 unsigned long ticks_to_us(unsigned long ticks) {
-    return ticks / (HZ / MICS_PER_SECOND); 
+    return TICKS_TO_TIME(ticks, MICS_PER_SECOND);
+}
+unsigned long ticks_to_ns(unsigned long ticks) {
+    return TICKS_TO_TIME(ticks, NANOS_PER_SECOND);
 }

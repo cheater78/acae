@@ -352,6 +352,9 @@
 #ifndef ITERATIONS
 #define ITERATIONS 1000
 #endif
+#ifndef ALLOW_INVALID_RUNS
+#define ALLOW_INVALID_RUNS 1
+#endif
 //~EDIT!
 
 #ifndef TIME

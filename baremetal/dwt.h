@@ -16,7 +16,7 @@
 
 // dwt helpers
 static inline void init_dwt() {
-    DWT_ENABLE;
+    // HW needs debug enabled first! -> platform_init
     DWT_LAR = 0xC5ACCE55; // unlock DWT (not needed for qemu, but required for real hardware)
     DWT_CYCCNT = 0;
     DWT_CTRL = 1;
