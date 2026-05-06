@@ -92,13 +92,8 @@ def sns_bar_add_value_text(barplot) -> None:
 
 
 ######################################################################################################################
-def plot_benchmark(platform: str, benchmark: str) -> None:
-    unit: str = benchmark_units[benchmark]
-    plot_file: str = os.path.abspath(f"{plot_path}/{platform}/{benchmark}.svg")
-    parent_path: str = os.path.abspath(f"{plot_path}/{platform}")
-    dataset_file: str = os.path.abspath(f"{results_path}/{platform}/{benchmark}.csv")
-    dataset = pd.read_csv(dataset_file)
 
+def plot_add_bar(dataset) -> plt.Axes:
     x_values = dataset["iterations"].unique()
     dataset_size = len(x_values)
     x_values_ld = np.log2(x_values).astype(int)
@@ -108,7 +103,6 @@ def plot_benchmark(platform: str, benchmark: str) -> None:
 
     avgd_dataset = dataset.groupby(["platform", "iterations"])["score"].mean().reset_index()
 
-    plt.figure()
     score_bar_pl = sns.barplot(
         x=x_ticks,
         y="score",
@@ -117,7 +111,22 @@ def plot_benchmark(platform: str, benchmark: str) -> None:
         palette="Set2",
         legend=False
     )
-    sns_bar_add_value_text(score_bar_pl)
+
+    score_bar_pl.set_xticks(x_ticks)
+    score_bar_pl.set_xticklabels(x_labels)
+
+    return score_bar_pl
+
+def plot_add_line(dataset) -> plt.Axes:
+    x_values = dataset["iterations"].unique()
+    dataset_size = len(x_values)
+    x_values_ld = np.log2(x_values).astype(int)
+
+    x_ticks = np.arange(dataset_size)
+    x_labels = [rf"$2^{{{x}}}$" for x in x_values_ld]
+
+    avgd_dataset = dataset.groupby(["platform", "iterations"])["score"].mean().reset_index()
+
     score_line_pl = sns.lineplot(
         x=x_ticks,
         y="score",
@@ -127,8 +136,49 @@ def plot_benchmark(platform: str, benchmark: str) -> None:
         legend=False
     )
 
-    score_bar_pl.set_xticks(x_ticks)
-    score_bar_pl.set_xticklabels(x_labels)
+    score_line_pl.set_xticks(x_ticks)
+    score_line_pl.set_xticklabels(x_labels)
+
+    return score_line_pl
+
+def plot_add_box(dataset) -> plt.Axes:
+    x_values = dataset["iterations"]
+    x_values_unique = x_values.unique()
+    dataset_size = len(x_values_unique)
+    x_values_ld = np.log2(x_values).astype(int)
+
+    x_ticks = np.arange(dataset_size)
+    x_labels = [rf"$2^{{{x}}}$" for x in x_values_unique]
+
+    score_box_pl = sns.boxplot(
+        x=x_values_ld,
+        y="score",
+        hue="platform",
+        data=dataset,
+        palette="Set2",
+        legend=False
+    )
+
+    formatter = FuncFormatter(lambda x, _: f'{x:,.3f}')
+    score_box_pl.yaxis.set_major_formatter(formatter)
+
+    score_box_pl.set_xticks(x_ticks)
+    score_box_pl.set_xticklabels(x_labels)
+
+    return score_box_pl
+
+def plot_benchmark(platform: str, benchmark: str) -> None:
+    unit: str = benchmark_units[benchmark]
+    plot_file: str = os.path.abspath(f"{plot_path}/{platform}/{benchmark}.svg")
+    parent_path: str = os.path.abspath(f"{plot_path}/{platform}")
+    dataset_file: str = os.path.abspath(f"{results_path}/{platform}/{benchmark}.csv")
+    dataset = pd.read_csv(dataset_file)
+
+    plt.figure()
+    score_bar_pl = plot_add_bar(dataset)
+    sns_bar_add_value_text(score_bar_pl)
+    #score_line_pl = plot_add_line(dataset)
+    score_box_pl = plot_add_box(dataset)
 
     plt.xlabel("iterations")
     plt.ylabel("score")
@@ -172,44 +222,6 @@ def plot_benchmark_platform_comparison(benchmark: str) -> None:
     plt.savefig(f"{plot_file}", bbox_inches="tight", format="svg", transparent=True)
 
 ######################################################################################################################
-def plot_benchmark_distribution(platform: str, benchmark: str) -> None:
-    unit: str = benchmark_units[benchmark]
-    plot_file: str = os.path.abspath(f"{plot_path}/{platform}/{benchmark}-dist.svg")
-    parent_path: str = os.path.abspath(f"{plot_path}/{platform}")
-    dataset_file: str = os.path.abspath(f"{results_path}/{platform}/{benchmark}.csv")
-    dataset = pd.read_csv(dataset_file)
-
-    x_values = dataset["iterations"].unique()
-    dataset_size = len(x_values)
-    x_values_ld = np.log2(x_values).astype(int)
-
-    x_ticks = np.arange(dataset_size)
-    x_labels = [rf"$2^{{{x}}}$" for x in x_values_ld]
-
-    plt.figure()
-    score_box_pl = sns.boxplot(
-        x="iterations",
-        y="score",
-        hue="platform",
-        data=dataset,
-        palette="Set2",
-        legend=False
-    )
-
-    formatter = FuncFormatter(lambda x, _: f'{x:,.3f}')
-    score_box_pl.yaxis.set_major_formatter(formatter)
-
-    score_box_pl.set_xticks(x_ticks)
-    score_box_pl.set_xticklabels(x_labels)
-
-    plt.xlabel("iterations")
-    plt.ylabel("score")
-    plt.title(f"{platform}: {benchmark} score (in {unit})")
-
-    os.makedirs(parent_path, exist_ok=True)
-    plt.savefig(f"{plot_file}", bbox_inches="tight", format="svg", transparent=True)
-
-######################################################################################################################
 
 # individual avg benchmark score per iterations bar plots
 plot_benchmark("acae", "dhrystone")
@@ -220,11 +232,5 @@ plot_benchmark("native", "coremark")
 # Platform comparison per benchmark bar plots
 plot_benchmark_platform_comparison("dhrystone")
 plot_benchmark_platform_comparison("coremark")
-
-# individual benchmark score distribution per iterations box plots
-plot_benchmark_distribution("acae", "dhrystone")
-plot_benchmark_distribution("acae", "coremark")
-plot_benchmark_distribution("native", "dhrystone")
-plot_benchmark_distribution("native", "coremark")
 
 plt.show()
