@@ -137,7 +137,7 @@ def plot_add_line(dataset) -> plt.Axes:
     )
 
     score_line_pl.set_xticks(x_ticks)
-    score_line_pl.set_xticklabels(x_labels)
+    #score_line_pl.set_xticklabels(x_labels)
 
     return score_line_pl
 
@@ -159,17 +159,17 @@ def plot_add_box(dataset) -> plt.Axes:
         legend=False
     )
 
-    formatter = FuncFormatter(lambda x, _: f'{x:,.3f}')
-    score_box_pl.yaxis.set_major_formatter(formatter)
+    #formatter = FuncFormatter(lambda x, _: f'{x:,.3f}')
+    #score_box_pl.yaxis.set_major_formatter(formatter)
 
     score_box_pl.set_xticks(x_ticks)
-    score_box_pl.set_xticklabels(x_labels)
+    #score_box_pl.set_xticklabels(x_labels)
 
     return score_box_pl
 
-def plot_benchmark(platform: str, benchmark: str) -> None:
+def plot_benchmark(platform: str, benchmark: str, rotate_xlabel: bool = False) -> None:
     unit: str = benchmark_units[benchmark]
-    plot_file: str = os.path.abspath(f"{plot_path}/{platform}/{benchmark}.svg")
+    plot_file: str = os.path.abspath(f"{plot_path}/{platform}/{platform}_{benchmark}_iter.pdf")
     parent_path: str = os.path.abspath(f"{plot_path}/{platform}")
     dataset_file: str = os.path.abspath(f"{results_path}/{platform}/{benchmark}.csv")
     dataset = pd.read_csv(dataset_file)
@@ -181,16 +181,18 @@ def plot_benchmark(platform: str, benchmark: str) -> None:
     score_box_pl = plot_add_box(dataset)
 
     plt.xlabel("iterations")
+    if rotate_xlabel:
+        plt.xticks(rotation=45, ha="right")
     plt.ylabel("score")
     plt.title(f"{platform}: {benchmark} score (in {unit})")
 
     os.makedirs(parent_path, exist_ok=True)
-    plt.savefig(f"{plot_file}", bbox_inches="tight", format="svg", transparent=True)
+    plt.savefig(f"{plot_file}", bbox_inches="tight", format="pdf", transparent=True)
 
 ######################################################################################################################
 def plot_benchmark_platform_comparison(benchmark: str) -> None:
     unit: str = benchmark_units[benchmark]
-    plot_file: str = os.path.abspath(f"{plot_path}/{benchmark}.svg")
+    plot_file: str = os.path.abspath(f"{plot_path}/{benchmark}_comp.pdf")
     parent_path: str = os.path.abspath(f"{plot_path}")
     
     dataset_files: list[str] = \
@@ -219,7 +221,7 @@ def plot_benchmark_platform_comparison(benchmark: str) -> None:
     plt.title(f"{benchmark} score (in {unit})")
 
     os.makedirs(parent_path, exist_ok=True)
-    plt.savefig(f"{plot_file}", bbox_inches="tight", format="svg", transparent=True)
+    plt.savefig(f"{plot_file}", bbox_inches="tight", format="pdf", transparent=True)
 
 ######################################################################################################################
 
@@ -233,4 +235,4 @@ plot_benchmark("native", "coremark")
 plot_benchmark_platform_comparison("dhrystone")
 plot_benchmark_platform_comparison("coremark")
 
-plt.show()
+#plt.show()
