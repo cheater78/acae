@@ -31,6 +31,16 @@ benchmark_units: dict [str, str] = {
     "coremark": "CoreMark",
 }
 
+def capitalize(s: str, all: bool = False):
+    if not s:
+        return s
+    if not all:
+        return s[0].upper() + s[1:]
+    caps: str = ""
+    for c in s:
+        caps += c.upper()
+    return caps
+
 def sns_bar_add_value_text(barplot) -> None:
     # text config
     fontsize=10
@@ -184,7 +194,7 @@ def plot_benchmark(platform: str, benchmark: str, rotate_xlabel: bool = False) -
     if rotate_xlabel:
         plt.xticks(rotation=45, ha="right")
     plt.ylabel("score")
-    plt.title(f"{platform}: {benchmark} score (in {unit})")
+    plt.title(f"{platform if platform != "acae" else "ACAE"}: {capitalize(benchmark)} score (in {unit})")
 
     os.makedirs(parent_path, exist_ok=True)
     plt.savefig(f"{plot_file}", bbox_inches="tight", format="pdf", transparent=True)
@@ -201,11 +211,11 @@ def plot_benchmark_platform_comparison(benchmark: str) -> None:
     datasets = [ pd.read_csv(dataset_file) for dataset_file in dataset_files ]
 
     dataset = pd.DataFrame()
-    dataset["platform"] = platforms + [ "reference" ]
-
+    dataset["platform"] = [ (p if p != "acae" else "ACAE") for p in platforms ] + [ "reference" ]
+    
     # consider the avg. score of max iterations for each platform
     avgd_dataset = [ dataset[dataset['iterations'] == dataset['iterations'].max()]['score'].mean() for dataset in datasets ]
-    
+
     plt.figure()
     score_bar_pl = sns.barplot(
         x="platform",
@@ -218,7 +228,7 @@ def plot_benchmark_platform_comparison(benchmark: str) -> None:
 
     plt.xlabel("platform")
     plt.ylabel("score")
-    plt.title(f"{benchmark} score (in {unit})")
+    plt.title(f"{capitalize(benchmark)} score (in {unit})")
 
     os.makedirs(parent_path, exist_ok=True)
     plt.savefig(f"{plot_file}", bbox_inches="tight", format="pdf", transparent=True)
