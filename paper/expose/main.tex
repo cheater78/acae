@@ -1,0 +1,171 @@
+\documentclass[english]{tudscrartcl}
+\usepackage{babel}
+\usepackage[babel]{microtype}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{clrscode}
+\usepackage{xcolor}
+\usepackage[pdftex]{graphicx}
+\usepackage{xurl}
+
+\begin{document}
+
+	\addtokomafont{subject}{\sffamily}
+	\title{Exposé: "Realization of a smart meter prototype based on hardware specifications"}
+	\author{Jakob Fregin}
+	\date{December 2025}
+
+  	\maketitle
+  	\pagenumbering{arabic}
+	\section{Introduction}
+	\normalsize
+	% Intro to SM in SGs
+	The rise of smart grids (SG) and consequently the increasing use of smart meters (SM) allows resource efficient balancing between consumption and production inside the grid \cite{en15196984}.
+	SMs constantly monitor and report their sensor values, enabling a on-demand, more stable and resilient grid \cite{en15196984}.
+	These SMs that formally contained primitive 8-bit MCUs, now feature 32-bit Systems-on-Chip (SoC) with multiple cores, various communication standards and other dedicated hardware \cite{ARTICLE:3}.
+	In their basic forms, SMs feature outage detection, remote management, trouble shooting and automatic billing \cite{7379940}.
+	Their real-time nature and capability for high sample rates enable fine-grained data analysis, e.g. for outage prediction \cite{8646486}
+	or value added services, e.g. dynamic pricing, allowing users to pay the best price available in each measurement interval.
+	
+	\section{Problem}
+	\normalsize
+	% Anonymity motivation
+	Despite growing capabilities that enhance their versatility and functionality,
+	SMs are still exposed to the Internet and the same level of security issues as other usually much more powerful network attached devices. 
+	At the same time, SMs pose an imminent threat to peoples privacy, since they collect a significant amount of personal data \cite{7959167},
+	due to their high sample rates and applicability for multiple resources, e.g. power, natural gas and water supply.
+	For instance, this data infers the presence of people at home or their economic stand based on their resource consumption \cite{7959167}
+	or can be further analyzed to extract individual appliance usage \cite{20101011}, exposing users habits and routines \cite{20101011}.
+	\\ % SM systems state of law - Germany
+	In the current state, as of November 2025 in Germany, smart metering is tightly regulated,
+	as SMs are designated to measure the resource at most every 15min (§55 Abs. 1 MsbG) \cite{Msbg55}.
+	After aquisition, the data is encrypted as well as signed, ensuring a confidential
+	and tamperproof communication between the SM and SMGW (§52 Abs. 1 MsbG) \cite{Msbg52}.
+	However, the SMGW can access unencrypted personalized data from multiple SMs.
+	Which, if compromised, would expose detailed consumption data of all connected households.
+	Only during aggregation anonymization is applied as far as the use case allows (§52 Abs. 3 MsbG) \cite{Msbg52}.
+	Apart from that, the granularity of 15min in combination with dynamic pricing allows for detailed billing.
+	This detail of billing is another privacy concern, since it potentially exposes the complete consumption behavior of a household,
+	while being recognised as valid data monitoring case by law (§50 Abs. 2 10. MsbG) \cite{Msbg50}.
+	\\ % Anonymity proposed solution
+	We propose that these privacy concerns could be solved by introducing anonymization directly on the SM,
+	keeping the data personalized on the customers' premises only. 
+	An exemplary concept to realize these privacy-preserving measurements, could include high frequency measurements, encryption, dynamic pricing,
+	anonymization amongst peers and evidence for the current price by a zero knowledge proof.
+	This concept would eliminate the need for sample rate limits or detailed billing, since privacy and validity are provided by cryptography.
+	Any privacy-preserving solutions would inherently result in higher computational effort for the SM as well as more network traffic,
+	for which the current SMs might lack in hardware.
+	\\ % Energy concerns
+	Another concern is energy efficiency \cite{RASHEDMOHASSEL2014473}.
+	Especially when creating decetrialized solutions that shall be applicable in SG where every household has at least one SM.
+	If SMs were to do extensive cryptography on-device, communicating in elevated frequency with neighbors,
+	this would result in longer active states and therefor higher power consumption.
+	Regarding SMs that are not directly connected to the power grid this becomes even more crucial,
+	since there additional maintenance, i.e. swapping a battery, would arise.
+	Therefor, an energy efficient approach would not only be more environmentally friendly,
+	but also in the interest of resource providers and customers.
+	For this, it is important to quantify resources and consumption of the SMs.
+	\\ % Final Problem / Goal Spec
+	In the upcoming work, we want to research the harware capabilities of SMs,
+	in order to explore the feasibility for extended on-device computation.
+	Therefore we want to create a representative SM hardware emulation,
+	benchmark it with computational operations and analyze the results,
+	to provide an outlook on the viability of the SM being a stand-alone, secure, privacy concerned device,
+	sharing only aggregated information as needed for billing or grid management.
+	
+	\section{Related Work}
+	% OSM
+	There already is an Open Smart Meter project, which is an open source hardware smart meter design \cite{OSM-WebSite, OSM-GitHub},
+	which can be used for SM research, experiemnts or deployment.
+	But since it is a HW SM, we still see a benefit in emulating the HW, to avoid the HW build step and setup.
+	\\ % MCU emulation
+	Furthermore there are various MCU emulators available, like e.g. QEMU \cite{QEMU-WebSite}, a functional instruction-set simulator(ISS) supporting several architectures,
+	which already have been used for emulating IoT devices \cite{66920, 10.1007/978-3-031-47457-6_5}.
+	For a more detailed hardware representation, there are system emulators like e.g. gem5 \cite{gem5-WebSite} or SystemC \cite{1193229},
+	which allow detailed models of CPUs, memory and peripherals. We consider those as options or references for our emulation,
+	while our focus will be on algorithm emulation including acurrate benchmarking, instead of real-time or explicit hardware simulation.
+  	\\ % IoT Benchmarking
+  	There also have been proposals for IoT device benchmarks \cite{6945583, 8802949}, like e.g. BenchIoT \cite{8809492}.
+	This benchmark is built to run on devices, comparable to SM MCUs, e.g. of the ARM Cortex M series.
+	Additionally, there are benchmarks for embedded devices in general, like e.g. EEMBC \cite{EEMBC-WebSite},
+	which provides computational workloads, such as CoreMark.
+	We want to use those benchmarks as references or even directly on our emulated SM.
+	\\ % Conclusion
+	Those Tools offer a starting point and reference for our emulation and benchmarking approach,
+	while some of their points, especially quite detailed hardware considerations, go out of our scope.
+
+	\section{Our Approach}
+	\normalsize
+  	% Model
+	We want to analyse the current hardware specifications of residential SMs,
+	in order to model and build a representative prototype as a virtual machine or in another emulated fashion.
+	Our work shall be based on publicly available information and literature,
+	as well as gathered specifications by manufactures or government regulatory institutes, if they are given on request.
+	Depending on the variety of harware specifications, we want to choose a representative set or devide the model into e.g. high-end and low-end.
+	Based on this, the chosen parameters shall represent a state of the art residential SM as closely as possible,
+	considering parameters like cpu cores and instructions per second, chache size, memory size, storage size, networking capabilites and energy consumption. 
+	\\ % Validation
+  	In the following step, we want to validate the emulated SM as accurately as possible.
+	First we will try to acquire actual HW benchmark data from vendors or government regulatory institutes,
+	to rerun those on the emulation as well and then cross check results.
+	If benchmarking data is not available as ground truth, we will search literature for similar hardware,
+	that may have been benchmarked with published results, to then again, check if those are reproduced by the emulation.
+	As a last resort, we would ensure that our emulation does implement the representative parameters chosen in the first step and
+	proceed with the analysis of this representative emulator.
+	\\ % Benchmarking - TODO
+	Given a working emulation, we want to benchmark computational and cryptographic operations to analyze the SMs' capabilites.
+	First we want to run established benchmarks, e.g. EEMBCs CoreMark, on the emulation, to present general performance data.
+	Then, we choose relevant cryptographic algorithms for encryption, signing and optionally anonymization,
+	that are either already in use in SM systems, e.g. AES-128 as stated by the Open metering System Group \cite{OMS-Spec},
+	or fit our mentioned goals in terms of anonymization. Those algorithms will then be run on the emulated SM,
+	by either compiling their naive implementations for best repeatability or using established benchmarks.
+	This data will provide an outlook on SMs capabilities, especially the estimated upper bound to the sampling frequency,
+	at which the SM can still encrypt and sign the data in real-time.
+	Additionally we want to analyze the network traffic generated by SMs,
+	when sending encrypted and signed measurement reports and optionally the overhead introduced by anonymization.
+	Since networking depends heavily on the used link, as well as its environment,
+	we want to take a theoretical approach to determine maximum data rates,
+	by analyzing the needed traffic for reporting measurements.
+	\\ % Optional Benchmarks
+  	If the work is finished early, we want to run further benchmarks, especially anonymization algorithms, e.g. deZent, on the emulator,
+	simulating other nodes and keeping network restictions, to get a first impression whether anonymization on SMs is even viable.
+	\\ % Energy
+  	This benchmark data would also allow for energy consumption estimations, using active time or energy per cycle characteristics,
+	providing an outlook on potential energy overhead, caused by future extensions.
+	
+	\section{Risks}
+	\normalsize
+  	% Time
+  	As risks, our time constrain of 20 weeks could significantly decrease the extent of work.
+	If thats the case, we consider to cut mainly in variety of benchmarks and pilot data created based on the model,
+	ensuring that parameters are chosen and the model is validated properly.
+	\\ % Setbacks e.g. benchmarking
+	Additionally setbacks in task completion as specified in the timeline, e.g. running a certain benchmark implemtation on the emulator, could arise.
+	We plan to always progress in parallel on multiple tasks, e.g. start data aquisition early on benchmarks that already work, to avoid blocking the whole work on a single issue.
+	\\ % HW limits
+	In general, we consider that, todays hardware might be neither performant nor effiecient enough for a full on device anonymization.
+	While this being the point of creating a emulated HW model, it could be that is not that much spare computation available on current devices.
+	This would still leave the model and emulator as a quick and easy tool to check whether other concepts are feasible, without extensive prototyping.
+  	\\ % Real world implementation
+	Another concern is real world implementation.
+	Our goals are primarily customer-focused, since we aim to provide users with greater privacy and control over their data.
+	However, this approach requires additional power and extended software support, increasing service maintenance costs.
+	For these reasons, we think that, adopting this type of system may not be attractive to service providers.
+	
+	\section{Timeline}
+	\normalsize
+	Since this work, as described, already breaks down into the following steps we allocate the maximum reserve of 20 weeks preliminarily as follows (listed as Work / Writing):
+	\begin{enumerate}
+		\item Collection and analysis of SM hardware data / Related Work + Background (3 weeks)
+		\item Modelling and building of a representative simulation / Related Work + Background + Evaluation(Log) (3 weeks)
+		\item Choice, analysis and implementation of cyptographic algorithms in SM systems / Model + Methodology + Evaluation(Log) (3 weeks)
+		\item Benchmarking and data collection using the emulation / Evaluation (3 weeks)
+		\item Conclusion: data analysis, forming results / Plots + Discussion + Limitations + Conclusion (3 weeks)
+		\item Paper finalization: reworks and polishing / Introduction + Future Work + Abstract (5 weeks)
+	\end{enumerate}
+	
+	\bibliographystyle{plain}
+	\bibliography{references}
+
+\end{document}
