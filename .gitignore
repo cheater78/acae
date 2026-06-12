@@ -55,6 +55,7 @@ dkms.conf
 *.dwo
 
 # explicit
+.vscode
 arm-gcc-install/
 compile_commands.json
 bin/
@@ -62,3 +63,14 @@ build/
 .cache
 *.swp
 *.log
+
+# LaTeX
+*.bbl
+*.synctex.gz
+*.synctex.gz(busy)
+*.aux
+*.bcf
+*.blg
+*.fdb_latexmk
+*.fls
+*.run.xml
