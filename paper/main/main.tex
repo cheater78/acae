@@ -1,0 +1,839 @@
+\documentclass[english]{tudscrartcl}
+
+\usepackage{graphicx}
+\graphicspath{
+	{./resources/}
+	{./resources/tud_logo_svg_rgb/Blau/}
+	{./resources/tud_logo_svg_rgb/Schwarz/}
+	{./resources/tud_logo_svg_rgb/Weiss/}
+	{./resources/plots/}
+	{./resources/plots/acae}
+	{./resources/plots/native}
+}
+
+% This was taken from tudscr src to change the TUD logo to the new one (TUD Corporate Design)
+\makeatletter
+\renewcommand*\tud@mainlogo@set{ % changed to override the exiting cmd
+  \if@tud@mainlogo@set%
+    \def\@tempa{\includegraphics[keepaspectratio,width=\tud@dim@logowidth]}%
+    \tud@savelayerbox{main@black}{\@tempa{TUD_Logo_RGB_horizontal_schwarz_en}}%
+    \tud@savelayerbox{main@HKS41}{\@tempa{TUD_Logo_RGB_horizontal_blau_en}}%
+    \tud@savelayerbox{main@white}{\@tempa{TUD_Logo_RGB_horizontal_weiss_en}}%
+    \settoheight\tud@dim@mainlogoheight{\tud@uselayerbox{main@black}}%
+    \global\tud@dim@mainlogoheight=\tud@dim@mainlogoheight%
+    \gdef\tud@mainlogo@wrn##1{%
+      \ifdim##1<\ta@bcor\relax%
+        \ClassWarning{\TUD@Class@Name}{%
+          The selected page layout means that the\MessageBreak%
+          logo of TUD extends beyond the printing area. \MessageBreak%
+          The inner margin is smaller than BCOR\MessageBreak%
+          (`BCOR=\the\ta@bcor', inner margin is \the##1)\MessageBreak%
+          Maybe you should decrease the current value\MessageBreak%
+          of DIV (`DIV=\the\ta@div')%
+        }
+        \global\let\tud@mainlogo@wrn\@gobble%
+      \fi%
+    }%
+    \tud@headlogo@set%
+    \global\@tud@footlogo@option@settrue%
+    \tud@footlogo@option@set%
+    \global\@tud@mainlogo@setfalse%
+  \fi
+}
+\makeatother
+% ~This was taken from tudscr src to change the TUD logo to the new one (TUD Corporate Design)
+
+\usepackage{babel}
+\usepackage[babel]{microtype}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{clrscode}
+\usepackage{xcolor}
+\usepackage{tabularx}
+\usepackage{array}
+\usepackage{xurl}
+\usepackage{subcaption}
+\usepackage{acronym}
+\usepackage{hyperref}
+\hypersetup{
+    colorlinks,
+    citecolor=black,
+    filecolor=black,
+    linkcolor=black,
+    urlcolor=black
+}
+\usepackage[backend=biber,style=numeric,sorting=none]{biblatex}
+\addbibresource{references.bib}
+
+% smart metering
+\acrodef{SG}{smart grid}
+\acrodef{AMI}{advanced metering infrastructure}
+\acrodef{MDMS}{meter data management system}
+\acrodef{CE}{central entity}
+\acrodef{SM}{smart meter}
+\acrodef{SMGW}{smart meter gateway}
+
+% hardware
+\acrodef{HW}{hardware}
+\acrodef{MCU}{microcontroller unit}
+\acrodef{CPU}{central processing unit}
+\acrodef{RAM}{random access memory}
+\acrodef{NVIC}{nested vectored interrupt controller}
+\acrodef{MPU}{memory protection unit}
+\acrodef{FPU}{floating-point unit}
+\acrodef{RTL}{register-transfer-level}
+\acrodef{ADC}{analog-to-digital converter}
+\acrodef{RTC}{real-time clock}
+\acrodef{RMS}{root-mean-square}
+\acrodef{ISA}{instruction set architecture}
+
+\acrodef{PLL}{phase-locked loop}
+\acrodef{HSE}{high speed external}
+\acrodef{UART}{Universal Asynchronous Receiver-Transmitter}
+
+% software
+\acrodef{OS}{operating system}
+\acrodef{RT-OS}{real-time operating system}
+\acrodef{STD}{C standard library}
+
+% simulation
+\acrodef{ISS}{instruction-set-simulator}
+\acrodef{TB}{translation block}
+
+% benchmark
+\acrodef{DMIPS}{Dhrystone mega instructions per second}
+\acrodef{EEMBC}{embedded microprocessor benchmark consortium}
+
+% acae
+\acrodef{ACAE}{ARM cycle accounting emulator}
+
+\begin{document}
+
+	\addtokomafont{subject}{\sffamily}
+	\title{A smart meter MCU emulation, introducing ACAE:\\An ARM cycle accounting emulator}
+	\author{Jakob Fregin}
+	\date{June 2026}
+
+  	\maketitle
+  	\pagenumbering{arabic}
+	
+	\begin{abstract}
+		Smart meters are increasingly considered as potential edge devices in future smart grids, enabling more advanced local processing beyond simple measurement and reporting.
+		However, research on extended smart meter functionality is limited by the proprietary nature of deployed hardware platforms and the lack of open development and evaluation environments.
+		This makes it difficult to prototype, validate, and assess the feasibility of novel smart meter applications before deployment.
+		\\
+		In this work, we present ACAE, an ARM cycle-accounting emulator for smart meter microcontroller units.
+		ACAE is built upon a representative smart meter \ac{MCU} model derived from publicly available specifications and implemented as an extended ARM Cortex-M4 board within the QEMU emulation platform.
+		The emulator incorporates cycle-accounting capabilities to enable performance-oriented evaluation of software running in a hardware-independent setting.
+		\\
+		We evaluate ACAE using the Dhrystone and CoreMark benchmarks and compare results against representative real hardware.
+		Our evaluation shows that Dhrystone executes $74.6\%$ faster in the emulator, while CoreMark executes $51.4\%$ faster.
+		Despite these absolute differences, ACAE reproduces key performance trends observed on hardware, indicating that the cycle-accounting model captures relevant execution behavior.
+		These results suggest that ACAE provides a promising foundation for estimating performance characteristics of smart meter applications.
+		\\
+		Overall, ACAE enables early-stage exploration of smart meter software and facilitates research into extended smart grid functionality, while highlighting the need for further refinement of cycle-accurate modeling and broader validation across workloads and architectures.
+		\\
+	\end{abstract}
+	
+	\clearpage
+
+	\section{Introduction}
+		\label{sec:intro}
+		As resource distribution systems, such as electricity grids, become increasingly complex due to growing demand and distributed generation, traditional grid management faces significant challenges.
+		\Acp{SG} provide the digital infrastructure required to modernize resource networks by enabling real-time monitoring and communication between consumers and providers.
+		This \ac{AMI} provides an enhanced view of the network, allowing for more resource-efficient distribution through supply-demand matching, reducing waste of energy and improving grid stability \cite{en15196984}.
+		Furthermore, the data collected by \acp{SM} supports extended applications such as outage prediction, faster fault detection, remote management, and prioritization in emergency situations \cite{7379940}.
+		Altogether, these components can contribute to a more reliable, resilient, and sustainable resource distribution system.
+		\\
+		In its current state as of 2026 in Germany, the regulatory framework primarily treats \acp{SM} as trusted measurement and reporting devices \cite{Msbg52, Msbg55}, while additional processing is performed at different points in the system.
+		However, \acp{SM} pose significant challenges to consumer privacy.
+		Due to their real-time operation and high sampling rates, they collect large amounts of potentially sensitive information \cite{7959167}.
+		Previous work has shown that this data can reveal the presence of occupants in a household as well as indicators of their socioeconomic status based on consumption patterns \cite{7959167}.
+		Furthermore, detailed analysis of \ac{SM} measurements can infer the usage of individual appliances \cite{20101011}, exposing consumers' habits and daily routines \cite{20101011}.
+		These concerns motivate the execution of privacy-preserving data processing techniques directly on the device, allowing sensitive consumption data to be anonymized, aggregated, or otherwise transformed before transmission.
+		\\
+		We propose that future \ac{SG} applications may require \acp{SM} to perform additional local computation.
+		However, developing and evaluating software for \acp{SM} remains challenging.
+		The software stacks and \ac{HW} architectures of commercially deployed devices are often proprietary and inaccessible to researchers and third-party developers.
+		Furthermore, standardized software development kits, testing environments, and hardware emulators are generally unavailable.
+		As a result, experimentation with novel \ac{SM} applications is difficult, limiting the ability to prototype, validate, and assess the feasibility of new approaches before investing in implementation on production hardware.
+		These limitations motivate the need for open and reproducible development environments that facilitate research on next-generation \ac{SM} applications.
+		\\
+		To address this challenge, we introduce an \ac{ACAE} designed to provide a \ac{HW}-independent platform for development and evaluation of extended \ac{SM} functionality.
+		The emulator aims to provide a software-based simulation with sufficient temporal resolution to estimate the performance impact of newly proposed algorithms and services.
+		In this way, \ac{ACAE} aims to enable rapid prototyping and comparative evaluation of \ac{SM} applications without requiring access to proprietary devices.
+		\\
+		To realize \ac{ACAE}, we construct a representative \ac{SM} \ac{MCU} emulator.
+		First, we investigate the \ac{HW} characteristics of recent \ac{SM} \acp{MCU} and derive a representative \ac{MCU} model.
+		Based on this model, we configure an existing emulation platform and extend it with a cycle-accounting mechanism.
+		Finally, we validate the emulator against measurements obtained from representative \ac{HW} and evaluate \ac{ACAE}s' timing performance with respect to real \ac{HW}.
+		\\
+		The remainder of this paper is structured as follows.
+		Section~\ref{sec:bg} provides general background on \acp{SM}, the \ac{MCU} of our model, and \ac{HW} simulation.
+		Section~\ref{sec:sysmodel} describes the representative \ac{SM} \acp{MCU} model, the cycle model, as well as the \ac{HW} validation model.
+		Section~\ref{sec:meth} explains our approach to emulation and validation.
+		Section~\ref{sec:eval} evaluates our results, states limitations, and proposes potential for future work.
+
+	\section{Background}
+		\label{sec:bg}
+		In the following section, we present background information about essential underlying technologies, such as \acp{SM}, \acp{MCU} with special focus on the ARM Cortex-M4, which we assume in our model, as well as benchmarking.
+		\\
+		\subsection{Smart Meter}
+			\label{sec:bg_sm}
+			\acp{SM} are essential components of an SG, constituting the edge nodes of an \ac{AMI}.
+			The \ac{AMI} is a network of sensors, aggregation, and analysis of collected data \cite{7379940}.
+			The \ac{SM} is an advanced resource meter, monitoring fine-grained resource consumption directly at the end customer \cite{6520030}.
+			This provides a real-time view of the resource consumption for the customer \cite{6520030}.
+			\\
+			\acp{SM} report their sensor values to \acp{SMGW}.
+			\acp{SMGW} then provide the first aggregation.
+			They receive real-time data from multiple geographically nearby \acp{SM} and forward the aggregate to the \ac{MDMS} \cite{7379940}.
+			The \ac{MDMS} is the \ac{CE}.
+			It collects metrology data across the entire \ac{SG} and performs the necessary analysis \cite{7379940}.
+			Additionally, the \ac{AMI} implements bidirectional communication between a customer's \ac{SM} and the resource provider \cite{7379940}.
+			This is done using a various communication standards \cite{6520030, en15196984}.
+			This centralized data and analysis, provided by the AMI extends the capabilities of the \ac{SG} beyond a traditional grid.
+			It allows for better supply demand matching, faster outage detection and restoration, as well as value-added services for the customers, such as providing their real-time consumption or dynamic pricing \cite{7379940}.
+			\\
+			Selected from these components, \acp{SM} pose the weakest system in regard to compute resources.
+			Since \acp{SM} are the most deployed and distributed, they are not equipped with more powerful processors as \acp{SMGW} are or reside in a data center setting as the \ac{CE}.
+			At its core, \acp{SM} consist of \acp{ADC} for metrology, a \ac{RTC} for accurate timestamping, and a \ac{MCU} running firmware to acquire and calculate metrology data.
+			In terms of electricity \acp{SM}, these measurements include \ac{RMS} voltage and current, active and reactive power, as well as power factor and frequency \cite{7379940}.
+			\\
+		\subsection{Microcontroller Unit}
+			\label{sec:bg_mcu}
+			The \ac{MCU} is a general-purpose computer executing its firmware stored in nonvolatile flash memory.
+			Regarding firmware there are several types.
+			\\
+			Bare-metal firmware is software that runs directly on the hardware and is therefore most tailored to a specific \ac{HW} architecture.
+			The entry point of execution is defined at a platform-dependent memory address from which the first instruction is fetched, decoded, and executed, post-incrementing the program counter \cite{tanenbaum2016structured}.
+			This first instruction invokes the boot sequence.
+			On bare-metal, this boot sequence is part of the user program, and all steps involved are compiled into a single monolithic binary.
+			The boot sequence includes setting the initial stack pointer to the upper \ac{RAM} address, implementing a downwards growing stack.
+			Following that, the data segment containing the user program is copied from flash memory to \ac{RAM}, the segment containing statically defined uninitialized variables is set to zero, and finally, a heap memory region is reserved \cite{ARMBMBASICS}.
+			This concludes a simple boot sequence, and the main function containing the user program is called.
+			Furthermore, a bare-metal setup requires to provide some fundamental backend functions if the \ac{STD} is used, providing primitives such as stdio or heap allocations.
+			\\
+			Another option for firmware is the use of a \ac{RT-OS}, which, contrary to the bare-metal setup, handles boot and standard library provisioning for the user. It generally provides some form of \ac{HW} abstraction, not requiring the user program to interface with the \ac{HW} directly.
+			\\
+			Lastly, there are \acp{OS} allowing the execution of multiple user programs and the OS handling context switches, scheduling \ac{CPU} time, and abstracting fully from \ac{HW} using drivers.
+			This also impedes the largest overhead with significant time spent in kernel execution.
+			In contrast, bare-metal executes the user program only until it exits and then halts.
+			\\
+			\subsubsection{The ARM Cortex-M4}
+				\label{sec:bg_mcu_cm4}
+				For our emulator, we aim to choose an \ac{MCU} that best reflects \ac{HW} used in real-world \acp{SM}.
+				We describe the derivation of the essential characteristics in Sec.~\ref{sec:sysmodel_sm_derivingmodel} in detail.
+				Based on our analysis, the ARM Cortex-M4 is a common off-the-shelf \ac{MCU} that aligns best with the characteristics of chips used in \acp{SM}.
+				\\
+				The following section is a summary of the ARM Cortex-M4 documentation \cite{ARMCM4DOC}, focusing on the most important properties for our work.
+				The ARM Cortex-M4 is a chip standard implemented by different vendors, encompassing a chip family with a standardized architecture and optional extensions.
+				\\
+				The ARM Cortex-M4 uses the ARMv7 Thumb and Thumb2 instruction set, being a 32-bit RISC architecture.
+				It implements a 3-stage pipeline consisting of instruction fetch, decode, and execution and doing so simultaneously.
+				This causes the execution of $1$ instruction per clock cycle, given that no pipeline stalls occur and excluding heavier instructions, such as division.
+				Other reasons for longer execution times are instruction fetches, loads, or stores from or to flash memory.
+				Flash is slower than a \ac{CPU} clock cycle and requires the implementation of wait states, stalling execution until the flash response time is matched.
+				In our case, using a \ac{CPU} frequency of 100MHz, 3 such wait states are required.
+				To mitigate these stall cycles, an instruction cache, as well as a data cache, is used, requiring no extra cycles as long as the data remains cached.
+				\\
+				Beyond that, the chip features a \ac{NVIC}, multiple high-performance bus interfaces, as well as an optional \ac{MPU} and \ac{FPU} with IEEE 754 single precision compliance.
+				Another important feature is the low-cost on-board debug solution, allowing for runtime performance instrumentation, which we use for time measurements.
+				Explicitly, if debug mode is enabled, a cycle count register can be queried, allowing for accurate time measurements with respect to the chip's clock frequency.
+				\\
+		\subsection{\ac{HW} Simulation}
+			\label{sec:bg_hwsim}
+			A \ac{HW} simulation running on a host machine provides a guest environment replicating selected \ac{HW} characteristics in software.
+			This allows the execution of guest code on the host machine using this guest environment in place of real \ac{HW} components.
+			\\
+			In order to simulate a guest \ac{HW} \ac{MCU} on a host machine, there are several, already existing, simulators, such as QEMU \cite{QEMU-WebSite}, gem5 \cite{gem5-WebSite}, or renode \cite{renode-WebSite}, amongst many others.
+			When choosing a simulator for scientific research, there are several aspects to consider \cite{8718630}, but most important for our purposes is the distinction between functional and cycle-accurate simulation.
+			Both types have significant advantages and drawbacks.
+			Cycle-accurate simulators execute instructions by simulating the processor's operations for each cycle.
+			Specifically, cycle-accurate simulators reproduce the exact data flow on the \ac{RTL} \cite{8718630}.
+			In contrast, functional simulators only replicate the functional behavior of the guest's \ac{ISA}, disregarding any micro-architectural behavior \cite{8718630}.
+			This difference in granularity causes emulation with cycle resolution to be generally significantly slower than functional emulators \cite{8718630}.
+			A major problem we faced with cycle-accurate simulators was the restricted access to vendor emulators or cycle-accurate models.
+			While we model an ARM \ac{MCU} and ARM does provide cycle-accurate models, so-called CPAKs, with a free educational license on request, handling and delivery delays of those resources did not fit our time frame.
+			In addition to requiring a cycle model, a full in-depth hardware simulation would have gone far beyond the scope of this work.
+			\\
+			In contrast, functional simulators or so-called emulators inherently cannot resolve time or micro-architectural effects and are fundamentally not fit for precise performance measurements.
+			Functional simulators can be used for identifying a program's architectural behavior, revealing the instruction trace, containing its distribution of instruction types, but also memory access, allowing for analysis regarding locality \cite{8718630}.
+			QEMU, gem5s ``SimpleAtomic'' \ac{CPU} model, and renode are functional emulators.
+			\\
+			There is existing work \cite{5642102} combining the best of both worlds.
+			They provide a cycle-accurate timing model for their functional \ac{ISS} called JIT DBT engine, surpassing traditional \ac{HW} FPGA-based simulators in speed.
+			Their work poses a proper approach to fast and cycle-accurate simulation, but its complexity reaches far beyond the scope of our work.
+			\\
+			Our final choice for fast emulation and attached instrumentation is QEMU \cite{QEMU-WebSite} using its ability to load user-written plugins.
+			QEMU is a functional emulator, dynamically translating guest binary instructions during execution \cite{bellard2005qemu}.
+			This is done in so-called \acp{TB}, aggregating blocks of contiguous instructions without any context change, such as jump or branch instructions \cite{bellard2005qemu}.
+			These \acp{TB} are then stored for immediate execution, as well as potential re-execution at another point in time.
+			This creates two distinct events to instrument: The translation once per \ac{TB} and the following \ac{TB} execution.
+			QEMU's plugin API provides these instrumentation points as callbacks that can be registered by the user, which is then integrated into the instruction flow \cite{QEMU-WebSite}.
+			Beyond that, QEMU provides the icount execution mode, resulting in a deterministic execution of instructions in the absence of asynchronous interrupts \cite{QEMU-WebSite}.
+			In contrast to gem5, QEMU supports the ARMv7 32bit Thumb/2 ISA, which is needed for our work, and QEMU's plugin interface provides a simpler deterministic instrumentation than renode.
+			\\
+			Ultimately, we used QEMU for our emulator and provided an ARM Cortex-M4 style debug cycle count register through a slight modification of the QEMU implementation and update the register through an instrumentation plugin.
+		\subsection{Benchmarking}
+			\label{sec:bg_benchmk}
+			In regard to performance validation of simulated or real-\ac{HW} systems, benchmarking is necessary.
+			There are several benchmarks for embedded systems \cite{weiss2002dhrystone, EEMBC-WebSite} and general sensor networks \cite{8802949, CHEN2022100091, 8809492}.
+			\\
+			The most useful benchmarks for \acp{MCU} are Dhrystone and EEMBC's CoreMark, since their scores are directly provided by the \ac{MCU} vendors in their respective data sheets, which can be seen in our data sheet collection \cite{ACAE-REPO}.
+			\\
+			Dhrystone is an integer-operation-based benchmark published in \citeyear{10.1145/358274.358283} \cite{10.1145/358274.358283}.
+			In the context of embedded systems, the Dhrystone benchmark is a general metric for \ac{MCU} performance, whilst not being capable of representing modern workloads \cite{weiss2002dhrystone}.
+			Nevertheless, it is widely used and also utilized in research \cite{10131693}.
+			While its simplicity allows Dhrystone to be easily ported to many platforms, it resides most of its runtime in \ac{STD} functions, such as strcmp, strcpy, and memcpy.
+			Therefore, it is heavily dependent on the platform implementation, as well as compiler optimizations \cite{weiss2002dhrystone}.
+			\\
+			While Dhrystone reports its score as Dhrystones per second, the general score is reported in \ac{DMIPS}.
+			This score in \ac{DMIPS} is calculated by referencing Dhrystones per second against the baseline score of 1757 Dhrystones per second.
+			This baseline is a score originally measured on a VAX 11/780 machine \cite{weiss2002dhrystone}.
+			\\
+			A more modern benchmark for embedded systems is CoreMark by the \ac{EEMBC} \cite{EEMBC-WebSite}.
+			It provides list, string, and matrix workloads, resulting in a single score, given by iterations per second, called CoreMark \cite{gal2012exploring}.
+			Contrary to Dhrystone, it has a strict rule set for valid benchmark results.
+			These rules include which files are allowed to be changed and score formatting, including compiler version and arguments, as well as CoreMark version, iterations, and the score \cite{EEMBC-WebSite}.
+			Additionally, the \ac{EEMBC} provides publicly hosted scores, submitted by users, adhering to the reporting rules.
+			As mentioned earlier, CoreMark has become a general metric for \ac{MCU} performance and is found in some vendor data sheets.
+			\\
+			Beyond those two benchmarks, there are other benchmarks \cite{8802949, CHEN2022100091, 8809492} focusing on embedded sensor networks.
+			Additionally, they measure the performance of smart home features, networking, and security aspects of embedded systems.
+			While these benchmarks could provide relevant insights for an \ac{SM} environment, our initial emulation does not feature the required peripherals.
+			Because of that and scarce reference data, we will not use these benchmarks.
+			\\
+			In this work, we will use Dhrystone and CoreMark to acquire performance data.
+
+	\section{System Model}
+		\label{sec:sysmodel}
+		Our goal for the \ac{SM} \ac{MCU} model is to represent the general computational performance of a recent, but average SM.
+		This shall serve as a foundation to simulate more complex operations like cryptographic operations in future analyses.
+		In order to build such a model, we required extensive data on \ac{SM} internal \ac{HW} to acquire a comprehensive representation of the current \ac{SM} market.
+		\\
+		\subsection{Smart Meter Model}
+			\label{sec:sysmodel_sm}
+			\subsubsection{Specification Acquisition}
+				\label{sec:sysmodel_sm_specacqu}
+				% public documentation? - no
+				First, we searched for general \acp{SM} and their documentation.
+				We found several vendors and their different \ac{SM} solutions.
+				These vendors generally documented the external properties of their \acp{SM} in data sheets.
+				This external data often includes operating voltages, frequencies, temperatures, connecting cable specifications, current limits, communication interfaces, the accuracy of measurements, and deviations.
+				While those specifications are sufficient for a contractor installing these devices, there are no mentions of internal properties, such as used \acp{MCU}, networking controllers, or metrology units.
+				We then searched for different documentation that was publicly available, such as those intended for repair or maintenance, but those as well were unavailable.
+				\\
+				% ask vendors
+				Next, we considered contacting \ac{SM} vendors directly.
+				We researched the biggest \ac{SM} vendors and their products, since these could provide the most accurate data for residential \acp{SM} that are being deployed in the real world.
+				We found articles analyzing the market share of \ac{SM} vendors and ranking them accordingly \cite{SMTOP10VENDORS-2024, SMTOP10VENDORS}.
+				Amongst them, we chose the recent article \cite{SMTOP10VENDORS}, mentioning the 10 most prevalent \ac{SM} vendors in 2025.
+				Hindered by contact formalities, we contacted 8, requesting any information about their \ac{SM} implementations, stating our research goal and emphasizing our interest in explicit \ac{MCU} specifications used in \acp{SM}.
+				We did not receive any response.
+				\\
+				% ask the "regulatory institute"
+				Since a regulatory institute could not provide us with information either, we returned to searching for publicly available articles and data sheets.
+				\\
+				% DIY
+				We collected \ac{SM} reference designs, articles describing \ac{SM} architecture, and \ac{MCU} data sheets, stating \acp{SM} as their application.
+				The proposed application for smart metering indicates that the chips are at least potential solutions for \acp{SM}, and, presumably, also deployed in real \ac{HW} devices.
+				To keep a recent, but sizeable dataset of specifications, we disregarded any data sheets from before 2010.
+				This resulted in a dataset containing a \ac{SM} reference design by Texas Instruments and 19 \ac{MCU} data sheets, suggesting \acp{SM} as their application.
+				We accumulated these chips and their specifications to then estimate the variety of chips used.
+				The data shows that there are reoccurring chip families and most modern \ac{SM} \acp{MCU} use a similar architecture.
+				\\
+				Based on this collection of \ac{SM} \ac{MCU} data sheets \cite{ACAE-REPO}, we then derive our model of an \ac{SM} MCU.
+				\\
+			\subsubsection{Deriving the Model}
+				\label{sec:sysmodel_sm_derivingmodel}
+				From our gathered chip specifications, we extracted metrics that were relevant for the emulation of our model, as well as shared between chips, contributing to a unified model.
+				\\
+				Those metrics include:
+				\begin{itemize}
+					\item \ac{ISA}
+					\item architectural standards
+					\item core count
+					\item word size
+					\item clock speed
+					\item RAM size and type
+					\item cache size
+					\item flash size
+					\item hardware extensions, such as:
+						\begin{itemize}
+							\item floating point unit (FPU)
+							\item dedicated cryptography and hashing units (AES, SHA, HMAC)
+							\item analog to digital converters (ADC)
+						\end{itemize}
+				\end{itemize}
+				Furthermore, we collected additional metrics to evaluate the relevance of the chips. By analyzing, whether certain features are present or generally how feature-rich a chip is, we can estimate more accurately, whether a chip could be implemented in a current smart meter or a general sensor network node.
+				\\
+				The metrics used for this meta information include:
+				\begin{itemize}
+					\item year of the data sheet
+					\item communication standards supported by the chip
+					\item ADC type, channels, sample rate, resolution
+					\item Core family
+					\item Chip family
+					\item RAM size and type
+					\item flash size
+				\end{itemize}
+				All those attributes were then collected in a table \cite{ACAE-REPO}.
+				We then evaluated an attribute value for each attribute, based on the meta attributes, the attributes themselves, and their alignment with respect to the rest of the dataset.
+				This value is meant to represent a recent average, with a tendency towards being future-proof.
+				These attributes and values finally form our representative \ac{SM} \ac{MCU} model.
+				\\
+				Given this model, we reached out to the regulatory institute once more to present our model.
+				They were able to verify that our model was indeed representative of an average \ac{SM} \ac{MCU}, which we consider proof, regarding the correctness of our model, matching our goals.
+				\\
+			\subsubsection{Representative Smart Meter \ac{MCU} Model}
+				\label{sec:sysmodel_sm_repsmmcumodel}
+				Table~\ref{tab:sm_mcu_model_specs} shows our representative \ac{SM} \ac{MCU} model.
+				The model is based on our collected data that was collected as described in Sec.~\ref{sec:sysmodel_sm_specacqu}.
+				\\
+				We model the average \ac{SM} \ac{MCU} core as an ARM Cortex-M4 as described in \ref{sec:bg_mcu_cm4}, since this chip aligns best with the characteristics of our collected data.
+				Importantly, our model considers two of such cores.
+				One core is used for metrology, using a sigma-delta ADC, as well as a single precision FPU for accelerated calculation of the measurement results.
+				The other core is used for communication of the measurements, as well as for general compute and control.
+				This includes value-added features, such as presenting information on a display.
+				Notably, the compute-core has an AES \ac{HW} accelerator supporting various operation modes, which would be used for secure communication to the upstream \ac{SMGW}.
+
+				\begin{table}[ht]
+					\centering
+					\newcolumntype{Y}{>{\raggedleft\arraybackslash}X}
+					\begin{tabularx}{\textwidth}{|l|Y|r|}
+						\hline
+						\textbf{Property} & \textbf{Value} & \textbf{Unit} \\
+						\hline
+						Core standard & ARM Cortex M4 & \\
+						\hline
+						Instruction Set Arch. & ARM Thumb\textregistered 2 & \\
+						\hline
+						Cores & 2 &  \\
+						\hline
+						Word size & 32 & bit \\
+						\hline
+						\ac{CPU} clock frequency & 100 & MHz \\
+						\hline
+						RAM & 128 & KB \\
+						\hline
+						RAM type & SRAM & \\
+						\hline
+						Cache & 2 & KB \\
+						\hline
+						Flash & 512 & KB \\
+						\hline
+						\textbf{Compute Core (emulated)} & & \\
+						\hline
+						FPU & no & \\
+						\hline
+						AES (dedicated access) & yes & \\
+						\hline
+						AES words & 128, 192, 256 & bit \\
+						\hline
+						AES modes & GCM, CBC, ECB, CFB, CBC-MAC, CTR & \\
+						\hline
+						SHA (dedicated access) & no & \\
+						\hline
+						HMAC (dedicated access) & no & \\
+						\hline
+						\textbf{Metrology Core (not emulated)} & & \\
+						\hline
+						ADC & yes & \\
+						\hline
+						ADC type & sigma-delta & \\
+						\hline
+						ADC channels & 4 & \\
+						\hline
+						ADC word & 20 & bit \\
+						\hline
+						FPU & yes & \\
+						\hline
+						FPU word & IEEE 754 single precision & \\
+						\hline
+					\end{tabularx}
+					\caption{MCU Model Specifications}
+					\label{tab:sm_mcu_model_specs}
+				\end{table}
+				\noindent
+
+		\subsection{Cycle Model}
+			\label{sec:sysmodel_cyclemodel}
+			A core module of our cycle-accounting emulation is the cycle model.
+			It translates executed instructions into an estimation of cycles that would have passed on a real \ac{HW} MCU.
+			The cycle model is a main component of our QEMU plugin, as it is queried whenever TB is translated, storing the associated cycle count of that TB.
+			This cycle count is then accumulated every time the TB is executed.
+			\\
+			% Explain mission codename "educated guess"
+			The cycle model used in this work is a first rudimentary implementation, resolving instruction cycles and memory access cycles only.
+			Instruction cycles are estimated by $1$ cycle for all instructions, excluding load and store instructions which contribute a cycle count of 2.
+			This matches the ARM Cortex-M4 documentation, as we explain in Sec.~\ref{sec:bg_mcu_cm4}.
+			This cycle count of 2 for load or store represents a rough estimate of the one cycle the instruction requires executing and one extra cycle until the value is available for the next instruction to be used.
+			Regarding memory access cycles, we assume two different memory regions.
+			The flash memory is accounted for by 1 additional memory access cycle, since most flash accesses will be cached, therefore will take no additional cycles, but cache misses will meet a penalty of 3 wait states, given our model.
+			The SRAM memory region is clocked synchronously to the \ac{CPU} and will return the requested value to the register within this single clock cycle, therefore no extra wait state is needed, and no additional cycle is attributed in our cycle model.
+			\\
+			These assumptions for our current cycle model are not tuned to match real \ac{HW} particularly well, but instead chosen for prototyping and a first proof of concept.
+			This cycle model provides a lower bound to the cycles required for a particular instruction.
+			While most instructions execute pipelined in $1$ cycle, according to the ARM documentation, some heavier instructions, such as division or branches, will be underestimated.
+			Further improvement of the cycle model will be needed for using the emulator as an accurate \ac{HW} replacement for scientific measurements.
+		\subsection{HW Model}
+			\label{sec:sysmodel_hwmodel}
+			The \ac{HW} model used for validation of our \ac{SM} emulation model matches as closely as practically feasible, as shown in Fig. \ref{tab:sm_mcu_refhw_specs}.
+			We use an STM32F411CEU6 on a BlackPill board from WeAct Studio, which is an off-the-shelf single-core ARM Cortex-M4 MCU.
+			It has 512 KB of flash memory and 128 KB of SRAM.
+			For its \ac{CPU} clock, it supports an internal clock, as well as a 25MHz external crystal oscillator, which is populated on our board.
+			In order to match our model of a 100 MHz \ac{CPU} clock, the chip uses a \ac{PLL} system to multiply the \ac{HSE} base clock.
+			Given those specifications, it matches our \ac{SM} \ac{MCU} model sufficiently for accurate validation. 
+			\\
+			% native USB issues
+			A limitation arises when using the native USB port on the board for benchmark result reporting.
+			While the direct use of the on-board USB interface poses the most convenient setup for validation, it requires an exact clock of 48MHz and a USB stack implementation.
+			Due to on-board clock distribution, this would cause an integer-scaled \ac{CPU} clock frequency of 96MHz, not matching our model, as well as introduce overhead by the USB stack.
+			\\
+			% UART relay with esp32
+			Considering these issues, we opted to use a primitive \ac{UART} interface on two of the chip's IO pins instead.
+			This provides light-weight serial communication, which we use for benchmark results and general state reporting outside any critical code sections for time-sensitive measurements.
+			In order to conveniently acquire the benchmark results, we used another chip that has an on-board serial-to-USB interface as a relay to then report any \ac{UART} output directly into the serial console \cite{ACAE-REPO}.
+			We note that this secondary chip is used for relaying of serial communication and therefore in no means impacting any performance measurements.
+
+
+			\begin{table}[ht]
+				\centering
+				\newcolumntype{Y}{>{\raggedleft\arraybackslash}X}
+				\begin{tabularx}{\textwidth}{|l|Y|r|}
+					\hline
+					\textbf{Property} & \textbf{Value} & \textbf{Unit} \\
+					\hline
+					Core standard & ARM Cortex M4 & \\
+					\hline
+					Instruction Set Arch. & ARM Thumb\textregistered 2 & \\
+					\hline
+					Cores & 1 &  \\
+					\hline
+					Word & 32 & bit \\
+					\hline
+					\ac{CPU} clock frequency & 100 & MHz \\
+					\hline
+					RAM & 128 & KB \\
+					\hline
+					RAM type & SRAM & \\
+					\hline
+					Cache & present & \\
+					\hline
+					Flash & 512 & KB \\
+					\hline
+					\textbf{Compute Core (emulated)} & & \\
+					\hline
+					FPU & yes, but disabled & \\
+					\hline
+					AES (dedicated access) & no & \\
+					\hline
+					SHA (dedicated access) & no & \\
+					\hline
+					HMAC (dedicated access) & no & \\
+					\hline
+					\textbf{Metrology Core (not emulated)} & not populated & \\
+					\hline
+				\end{tabularx}
+				\caption{Black Pill Board (STM32F411CEU6) specifications}
+				\label{tab:sm_mcu_refhw_specs}
+			\end{table}
+			\noindent
+
+	\section{Methodology}
+		\label{sec:meth}
+		\subsection{Emulation}
+			\label{sec:meth_emu}
+			Following our Model, we searched for ARM-compatible freeware emulators, as mentioned in Sec.~\ref{sec:bg_hwsim}.
+			Since we require a timing accurate emulator for performance benchmarking, the first choice would be a cycle-accurate emulator, which fully represents the \ac{MCU}'s components architecture, such as the pipeline, caches, and connecting buses.
+			As we presented in Sec.~\ref{sec:bg_hwsim}, this would go beyond our scope, which is why we chose QEMU as our emulator.
+			\\
+			QEMU tracks the guest execution state and translates all guest instructions on demand in as \acp{TB}.
+			These \acp{TB} are kept in strict order.
+			QEMU provides an execution mode called icount, which causes any guest instruction to be executed sequentially, allowing for individual instrumentation using QEMU's TCG plugins.
+			This results in a functional and therefore faster than a cycle-accurate emulator that allows for precise instruction counting.
+			\\
+			However, instruction counting does not resolve time, clock cycles do.
+			In order to resolve \ac{HW} cycles approximately, we introduced an instruction-to-cycle model, as described in Sec.~\ref{sec:sysmodel_cyclemodel}.
+			This cycle model is queried to account for any passing instruction during execution and convert the computation into an approximated real-world cycle count.
+			This cycle count is then passed back into the guest environment at runtime to provide our cycle count register.
+			The cycle count register can then be used by any guest application to get a real-time estimate.
+			We note that the register is a 32-bit unsigned integer directly reporting cycles.
+			This limits the maximum time measurement span to $2^{32}$ cycles, which we resolve by wrapping overflows.
+			All of our implemented benchmarks were adjusted to use this cycle count for their time measurement.
+			Altogether, this yields a cycle accounting emulator.
+			\\
+		\subsection{Validation}
+			\label{sec:meth_valid}
+			To validate our emulator, the selected benchmarks Dhrystone and CoreMark were executed both on our emulator and on real \ac{HW}.
+			For comparability, all benchmarks were compiled as bare-metal to monolithic binaries with identical configurations on both platforms.
+			All benchmark runs were compiled without compiler optimizations and without debug information.
+			The use of a bare-metal environment combined with disabled optimizations was intended to maximize determinism and reproducibility across all measurements.
+			\\
+			For the validation \ac{HW}, the generated binaries were programmed onto the target device using its bootloader operating in DFU mode.
+			Firmware transfer was performed from the host system using \texttt{dfu-util} via the on-board USB interface.
+			After flashing, the device automatically reset and transitioned from DFU mode into normal execution mode.
+			The benchmark binary then entered the boot sequence described in Sec.~\ref{sec:bg_mcu}, executed the benchmark, and halted.
+			Benchmark results were transmitted via \ac{UART}, as described in Sec.~\ref{sec:sysmodel_hwmodel} and collected.
+			\\
+			The experimental setup required several modifications to both benchmarks.
+			First, benchmark restrictions regarding minimum execution time were removed.
+			This was necessary because of the limited range of the cycle count register impeding an upper limit on execution time.
+			As a result, benchmark executions with low iteration counts became possible.
+			These short executions contain a comparatively large proportion of non-benchmark overhead, which is the reason benchmark specifications normally impose restrictions on valid runs.
+			While such runs are not representative of absolute benchmark performance and therefore partially invalidate benchmark-compliant score reporting, they provide additional reference points for comparing emulator and \ac{HW} characteristics.
+			\\
+			To ensure compatibility with the bare-metal setup, benchmark calls to selected \ac{STD} and system functions were replaced with equivalent bare-metal implementations.
+			Furthermore, an automated score readout mechanism was added to simplify the execution of multiple benchmark configurations in succession and to allow automatic result collection.
+			No modifications were made to any time-sensitive benchmark sections.
+			Consequently, all reported scores remain representative of the timing behavior of the respective execution platform.
+			\\
+			The iteration count for each benchmark was specified through the \texttt{ITERATIONS} make variable, which was forwarded to the \texttt{arm-none-eabi-gcc} preprocessor and integrated into the benchmark build process.
+			For all benchmark runs, compilation was performed using the \texttt{-O0} and \texttt{-g0} compiler flags, thereby disabling optimizations and excluding debug information.
+			\\
+			The benchmark-specific configurations differed as follows.
+			Dhrystone was compiled using the \texttt{-std=gnu89} flag, as it relies on C89 language features within its time-sensitive code sections, which were intentionally left unchanged.
+			Due to the cycle count register overflow limitation described above, Dhrystone measurements were restricted to iteration counts ranging from $1$ to $2^{20}$.
+			Following execution, Dhrystone scores were reported in DMIPS and DMIPS/MHz through our modifications.
+			These values are derived from the benchmark's original output in Dhrystones per second by referencing the VAX 11/780 baseline as described in Sec.~\ref{sec:bg_benchmk}.
+			\\
+			CoreMark, being a more recent benchmark, was compiled using the \texttt{arm-none-eabi-gcc} default C17 standard.
+			Measurements were performed for iteration counts ranging from $1$ to $2^{11}$.
+			After each execution, CoreMark reported its score in iterations per second.
+			These values were subsequently presented as scores in CoreMark and CoreMark/MHz.
+			\\
+	\section{Evaluation}
+		\label{sec:eval}
+		In the following section, we present our results, discuss them, and provide reasons and implications.
+		Lastly, we describe limitations of our work, as well as our emulator, posing opportunities for future work to improve on the state presented today.
+		\\
+		\subsection{Results}
+			\label{sec:eval_results}
+			In the following section, we present the performance results of our emulation, as well as the validation on real \ac{HW}.
+			We measured the performance by running the $2$ selected benchmarks, Dhrystone and CoreMark, with various iteration counts, repeating each run $3$ times.
+			The standard deviation between runs of identical configurations is shown as a box plot, while the absolute score results are depicted as bars.
+			\\
+			We adjusted the recorded maximum iteration counts between Dhrystone and CoreMark, since both benchmarks differ in time required per iteration significantly.
+			The minimum iteration count is given by $1$ for both benchmarks.
+			We used these limits to obtain the largest possible dataset.
+			\\
+			All results obtained on our emulator are denoted as \emph{\ac{ACAE}}, and on the physical \ac{MCU} as \emph{native}.
+			\emph{Reference} marks performance values given by the \ac{MCU} vendor.
+			\\
+			\subsubsection{Dhrystone}
+				\label{sec:eval_results_dhrystone}
+				\begin{figure}[ht]
+					\centering
+
+					\begin{subfigure}{0.49\textwidth}
+						\centering
+						\includegraphics[width=\linewidth]{acae_dhrystone_iter.pdf}
+						\caption{Dhrystone score on \ac{ACAE}}
+						\label{fig:dhrystone_iter_acae}
+					\end{subfigure}
+					\hfill
+					\begin{subfigure}{0.49\textwidth}
+						\centering
+						\includegraphics[width=\linewidth]{native_dhrystone_iter.pdf}
+						\caption{Dhrystone score on native}
+						\label{fig:dhrystone_iter_native}
+					\end{subfigure}
+
+					\caption{Dhrystone score}
+					\label{fig:dhrystone_iter}
+				\end{figure}
+				\noindent
+				First, we ran Dhrystone on our emulator, starting at $1$ iteration, increasing iterations exponentially to base 2 with a maximum iteration count of $2^{20}$.
+				The resulting scores are reported in DMIPS over a logarithmic scale of iterations, as shown by Fig. \ref{fig:dhrystone_iter_acae}.
+				They start with a score of $42.987$ DMIPS at $1$ iteration.
+				Following that, there is an increase in score for higher iteration counts, approaching a limit.
+				Starting at $2^{14}$ iterations, the highest score of $44.396$ DMIPS is reached and remains until the maximum iteration count of $2^{20}$.
+				The box plot resolving the deviation between the $3$ repetitions of identical configuration appears as a line, showing that there is no standard deviation.
+				\\
+				Second, we ran Dhrystone on our \ac{HW} ARM Cortex-M4 board for validation measurements.
+				These scores are then again reported in DMIPS over a logarithmic scale of iterations, as shown by Fig. \ref{fig:dhrystone_iter_native}.
+				They start with a score of $24.406$ DMIPS at $1$ iteration.
+				Following that, there is an increase in score for higher iteration counts, approaching a limit.
+				Starting at $2^{11}$ iterations the highest score of $25.431$ DMIPS is reached and remains until the maximum iteration count of $2^{20}$.
+				The box plot resolving any deviation between our 3 runs of exact equal configuration appears as a line, showing that there is no standard deviation.
+				\\
+				Notably, the scores of Dhrystone running on our emulator are higher than on the native \ac{HW}.
+				This can be seen at $1$ iteration, with a score increase of $76.1\%$ on our emulator in reference to the native \ac{HW}.
+				This slightly decreases for the highest iteration count of $2^{20}$ at a score increase $74.6\%$ on our emulator in reference to the native \ac{HW}.
+				Additionally, the observed decrease in performance at $1$ iteration amounts to $3.2\%$ of the maximum score at $2^{20}$ iterations on ACAE and $4.0\%$ on the native \ac{HW}, respectively.
+				\\
+				\begin{figure}[ht]
+					\centering
+					\includegraphics[width=\linewidth]{dhrystone_comp.pdf}
+					\caption{Dhrystone score compared}
+					\label{fig:dhrystone_comp}
+				\end{figure}
+				\noindent
+				Fig. \ref{fig:dhrystone_comp} explicitly shows the discrepancy in performance, which is measured in DMIPS at $2^{20}$ iterations.
+				It contains the results of our emulator and the real \ac{HW} for validation.
+				The third bar shows the reference value that was obtained directly from a comparison of ARM Cortex-M chips by ARM \cite{ARMCHIPCOMPARE}, as well as the STM32F411xC data sheet of our \ac{HW} chip.
+				Both claim a score of $125$ DMIPS at our model's targeted 100MHz and do not provide any detail on the used compiler, optimizations, or C standard.
+				Both used Dhrystone 2.1, matching our setup in that regard.
+				This provides a proper comparison between our emulator and the real \ac{HW}, while showing a coarse insight into publicly available vendor performance claims, missing the necessary context.
+				\\
+			\subsubsection{CoreMark}
+				\label{sec:eval_results_coremark}
+				\begin{figure}[ht]
+					\centering
+
+					\begin{subfigure}{0.49\textwidth}
+						\centering
+						\includegraphics[width=\linewidth]{acae_coremark_iter.pdf}
+						\caption{CoreMark Score on \ac{ACAE}}
+						\label{fig:coremark_iter_acae}
+					\end{subfigure}
+					\hfill
+					\begin{subfigure}{0.49\textwidth}
+						\centering
+						\includegraphics[width=\linewidth]{native_coremark_iter.pdf}
+						\caption{CoreMark Score on native}
+						\label{fig:coremark_iter_native}
+					\end{subfigure}
+
+					\caption{CoreMark Score}
+					\label{fig:coremark_iter}
+				\end{figure}
+				\noindent
+				Following Dhrystone, we run CoreMark on our emulator, starting at $1$ iteration, increasing iterations exponentially to base 2 with a maximum iteration count of $2^{11}$.
+				The final results are reported in CoreMark over a logarithmic scale of iterations, as shown by Fig. \ref{fig:coremark_iter_acae}.
+				They start with a score of $89.350$ CoreMark at $1$ iteration.
+				Following that, there are insignificant deviations at iterations below $2^{9}$.
+				Starting at $2^{9}$ iterations, the score of $89.344$ CoreMark remains the same for $2^{10}$ and $2^{11}$ iterations.
+				The box plot resolving any deviation between our 3 runs of exact equal configuration appears as a line, showing that there is no standard deviation.
+				\\
+				Similarly, as the second step, we ran CoreMark on our \ac{HW} ARM Cortex-M4 board for validation results.
+				These results are depicted in Fig. \ref{fig:coremark_iter_native}.
+				They start with a score of $59.016$ CoreMark at $1$ iteration.
+				Following that, there is insignificant deviation at iterations below $2^{9}$.
+				Starting at $2^{9}$ iterations, the score of $59.015$ CoreMark remains the same for $2^{10}$ and $2^{11}$ iterations.
+				The box plot resolving any deviation between our 3 runs shows no standard deviation.
+				\\
+				Similar to Dhrystone, the scores of CoreMark running on our emulator are higher than on the native \ac{HW}.
+				This can be seen best at the stable high iteration counts from $2^{9}$ to $2^{11}$ iterations, with a score increase of $51.4\%$ on our emulator in reference to the native \ac{HW}.
+				\\
+				\begin{figure}[ht]
+					\centering
+					\includegraphics[width=\linewidth]{coremark_comp.pdf}
+					\caption{CoreMark score compared}
+					\label{fig:coremark_comp}
+				\end{figure}
+				\noindent
+				Fig. \ref{fig:coremark_comp} explicitly shows the discrepancy in performance, which here is measured in CoreMark at $2^{11}$ iterations.
+				Similar to Dhrystone, it contains the results of our emulator, as well as the real \ac{HW} for validation.
+				The third bar shows the reference value that was obtained directly from a comparison table by ARM, which claims a score of $3.42$ CoreMark/MHz, resulting in $342$ CoreMark at 100MHz \cite{ARMCHIPCOMPARE}.
+				Similarly, there is no detail provided on the used compiler, optimizations, or C standard.
+				This yields a comparison between our emulator and the real \ac{HW}, while the vendor claim is provided for context.
+				\\
+		\subsection{Discussion}
+			\label{sec:eval_disc}
+			Overall, our results suggest that emulation of an \ac{SM} \ac{MCU} is possible.
+			Additionally, in the setting of a fast emulation using a functional emulator, performance estimations are viable.
+			\\
+			We observe that Dhrystone runs $74.6\%$ and CoreMark $51.4\%$ faster on our emulator than on real \ac{HW}.
+			Since this runtime is not defined by the host execution time of the emulation, but rather by the cycle accounting using our model, we suggest that this discrepancy arises mainly from our simplified cycle model.
+			This aligns with our approach of assuming $1$ cycle per instruction by default.
+			This assumption does hold for most instructions, according to the ARM documentation, but does not resolve heavier instructions, such as division or branches.
+			Especially branches, which we assume are quite frequent, will cause a pipeline refill.
+			A pipeline refill affects the next instruction to reach the execution stage $3$ cycles after a branch execution, under accounting this instruction by a factor of $3$.
+			A worse effect arises using division instructions, which are documented to require $8$ to $12$ cycles.
+			We suggest that our results reflect this exact deviation, accounting for most instructions properly, but significantly under accounting for some rarer but still frequent instructions.
+			Considering these circumstances and given our performance estimation within the same order of magnitude, we are confident that our emulator could yield sufficiently precise results, provided further adjustments.
+			We suggest that a validation-driven refinement to the cycle model poses a promising subject for future work.
+			\\
+			Apart from that, our data implies that our emulator is reproducing \ac{HW} characteristics in other regards.
+			The \ac{HW} board running a bare-metal program is fully deterministic, which is matched by our emulation.
+			On the one hand, this is necessary for our cycle accounting strategy, but on the other hand, it provides reproducibility posing a solid foundation for the comparability of performance measurements.
+			Another such characteristic is the observed performance decrease of Dhrystone at $1$ iteration.
+			While on native \ac{HW} the decrease amounts to $4.0\%$ of the maximum score, our emulation shows a similar decrease of $3.2\%$.
+			We observe repeatedly, that our emulation performs better than the real \ac{HW}, which we attribute to the insufficiently accounted instructions mentioned above.
+			In contrast to Dhrystone, CoreMark does not show such instability at low iterations, but remains stable across iterations with insignificant deviations on both platforms.
+			This may be attributed to the more modern and thoughtful design of CoreMark for benchmarking embedded systems.
+			\\
+			Finally, we observe a major discrepancy between our results and our vendor reference values.
+			Our Dhrystone result on our real \ac{HW} is $79.7\%$ lower in reference to the vendor value.
+			Similarly, the validation CoreMark score is $82.7\%$ lower in reference to the vendor value.
+			We propose that these discrepancies arise from our approach of worst-case performance.
+			We do not make use of compiler optimizations or \ac{HW} specific implementations of the \acl{STD}.
+			In contrast, we do expect vendors to optimize their performance results as much as possible for marketing reasons.
+			Considering that no context was provided to these reference values, we cannot definitively claim that this is the case, and we solemnly included these values as a comparison to publicly available data.
+			\\
+		\subsection{Limitations}
+			\label{sec:eval_limits}
+			In the following section, we propose concise limitations of our work, as well as our emulator.
+			We frame these limitations in their context and provide suggestions for improvement.
+			\\
+			As described in Sec.~\ref{sec:sysmodel_sm}, our emulation builds on publicly available data regarding \ac{SM} \ac{MCU} data.
+			We gathered this data from multiple sources, but found it to be rather scarce.
+			This limits our dataset and does not allow for a statistical evaluation of a broad range of \acp{SM}.
+			We use the available data to create our single \ac{SM} \ac{MCU} model, based on chips suggested for electrical metering.
+			This excludes \acp{SM} for different resources, as well as different device classes, such as high-end or low-end, as originally considered.
+			We propose that this could be improved either by direct cooperation with \ac{SM} vendors or a general open source shift of the \ac{SM} market.
+			In our opinion, both seem unlikely unless properly incentivized.
+			\\
+			The limitation to 2 benchmarks arises from our time constraint, as well as from compatibility and utility reasons.
+			We focus on Dhrystone and CoreMark, as explained in Sec.~\ref{sec:bg_benchmk} for their broad use in embedded systems.
+			Both benchmarks have publicly available performance data, which we consider for validation.
+			Implementing other benchmarks does not promise to provide similar reference data.
+			We do suggest however, that other benchmarks would provide meaningful validation data if validation runs are recorded on native \ac{HW}, as we do with Dhrystone and CoreMark.
+			We propose that implementing a broader range of benchmarks followed by appropriate adjustments to the cycle model poses the best next step to improving the emulator.
+			\\
+			In the process of constructing our emulator, we assume multiple aspects to keep our work feasible.
+			First, our emulator is tailored to our model and methodology.
+			\\
+			Therefore, it supports exclusively the ARM Cortex-M4 chip family.
+			Our modifications to the QEMU board do not natively translate to other chips or architectures and would have to be reconsidered and reimplemented accordingly.
+			\\
+			The build system is based on a bare-metal architecture.
+			While an \ac{OS} could be more user-friendly, we do not provide the tool chain for building and flashing non-monolithic binaries.
+			\\
+			We provide a startup system and selected system functions.
+			Any future software requirements, such as extended \ac{STD} support, may need dedicated implementation.
+			\\
+			For our explicit board, presented in Sec.~\ref{sec:sysmodel_hwmodel}, any \ac{HW} validation data reporting is done by serial communication using another chip.
+			In order to use the onboard USB port, a USB stack would have to be implemented on bare-metal.
+			We suggest that integrating a Hardware-Abstraction-Layer driver into our bare-metal setup could provide the fastest way to reach native USB functionality, while imposing some overhead.
+			\\
+			Second, we constrain binaries to require function symbols.
+			This limitation arises from QEMU's plugin implementation, focusing more on pure instrumentation and less on synchronized host-to-guest interaction.
+			Function symbols currently allow for faster emulation performance on the host using our QEMU plugin.
+			We suggest that the use of compiler optimization and, therefore, omission of symbols would provide a larger dataset for validation and potential cross-referencing to public vendor data.
+			However, this would slow emulation speed or require major changes to the QEMU source code.
+			\\
+			Lastly, our emulation explicitly implements the \ac{MCU}.
+			While peripherals such as \acp{ADC} or network interface controllers would be desirable for a complete \ac{SM} emulation, their realization would require major modifications to the QEMU source code and is beyond the scope of our work.
+			\\
+			Our emulator is tailored to our model as described in Sec~\ref{sec:sysmodel_sm_repsmmcumodel} and requires some improvement on the cycle model, but overall mimics \ac{SM} \ac{MCU} characteristics in a promising manner.
+	\section{Conclusion}
+		We suggest that \acp{SM} are expected to play an increasingly active role in future \acp{SG}, potentially serving as edge-computing devices that support advanced functionality beyond measurement and reporting.
+		However, research on such extensions is hindered by the proprietary nature of commercially deployed \acp{SM} and the lack of accessible development and evaluation environments.
+		To address this challenge, this work introduced \ac{ACAE}, a \ac{HW}-independent \ac{SM} emulation approach based on a representative \ac{SM} \ac{MCU} model derived from publicly available specifications.
+		To realize \ac{ACAE}, QEMU's ARM Cortex-M4 board was extended with cycle-accounting capabilities.
+		The resulting emulator aims to facilitate the development and performance-oriented evaluation of novel \ac{SM} applications without requiring access to proprietary \ac{HW}.
+		\\
+		The proposed approach was evaluated using the Dhrystone and CoreMark benchmarks.
+		Relative to the reference \ac{HW} platform, Dhrystone executed $74.6\%$ faster on the emulator, while CoreMark executed $51.4\%$ faster, respectively.
+		Despite these deviations in absolute score, ACAE successfully reproduced the observed performance trends of both benchmarks.
+		In particular, Dhrystone exhibited increasing benchmark scores with increasing iteration counts on both platforms, while CoreMark remained largely stable across all evaluated iteration counts.
+		These results indicate that the implemented cycle-accounting approach captures relevant execution characteristics and provides a promising basis for performance estimation.
+		Although the cycle model requires further refinement to improve timing accuracy.
+		\\
+		Several limitations remain. The current cycle model does not yet account sufficiently for all instruction classes and execution effects.
+		In particular, the influence of pipeline refills, division instructions, and other micro-architectural effects should be investigated to improve the accuracy of cycle estimation.
+		Furthermore, the representative \ac{MCU} model was derived exclusively from publicly available data sheets of \acp{MCU} proposed for smart metering applications, as detailed documentation of commercial \ac{SM} \ac{HW} is generally unavailable.
+		The evaluation was limited to two benchmark suites and a single ARM Cortex-M4 architecture.
+		In addition, the current implementation requires binaries to be compiled with symbols included and without compiler optimizations, restricting the range of software that can presently be evaluated.
+		\\
+		Future work will therefore focus on refining the cycle model to improve timing accuracy and extending the validation using a broader set of benchmark applications.
+		A larger validation dataset will provide deeper insight into the strengths and limitations of the proposed approach and support the calibration of the cycle-accounting mechanism.
+		Furthermore, enabling support for optimized binaries would significantly increase the practical applicability of ACAE and allow the evaluation of software under conditions that more closely resemble real-world deployments.
+		Through these extensions, ACAE can evolve into a more accurate and versatile tool for researching future \ac{SM} functionality and \ac{SG} applications.
+	
+	\printbibliography
+
+\end{document}
