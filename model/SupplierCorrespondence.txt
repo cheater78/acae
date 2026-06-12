@@ -1,0 +1,54 @@
+Name: SMA
+Link: SMA.de
+Contact: info@SMA.de
+Status: requested via mail
+
+Name: Sagecom
+Link: sagecom.com
+Contact: presse@sagecom.com
+Status: requested via mail
+
+Name: Aclara Technologies LLC
+Link: https://www.hubbell.com/aclara/en/contact-us
+Contact: aclarainfo@hubbell.com
+Status: requested via mail
+
+Name: Itron, Inc.
+Link: https://na.itron.com/locations#all-locations
+Contact: info.prague@itron.com
+Status: requested via mail
+
+Name: Kamstrup A/S
+Link: https://www.kamstrup.com/en-en/get-in-touch?selectedCountry=DE
+Contact: info@kamstrup.de
+Status: requested via mail
+
+Name: Countrol GmbH
+Link: https://countrol.de/
+Contact: kontakt@countrol.de
+Status: requested by supervisor at starzacher@countrol.de
+
+Name: Schneider Electric
+Link: https://www.se.com/ww/en/about-us/contact/
+Contact: None
+Status: no contact
+
+Name: Landis+Gyr Group AG
+Link: https://www.landisgyr.com.au/contact/
+Contact: WebForm
+Status: requires phone number
+
+Source: (article from 2025) https://www.blackridgeresearch.com/blog/list-of-global-top-smart-electric-electricity-gas-water-meter-companies-manufacturers-makers-suppliers-in-the-world
+
+1. Aclara Technologies LLC
+2. Honeywell International Inc.
+3. Itron, Inc.
+4. Kamstrup A/S
+5. Landis+Gyr Group AG
+6. Schneider Electric SE
+7. Sensus (Xylem Inc.)
+8. Wasion International
+
+older article:
+Source: (article from Jul 2024) https://www.tosunlux.eu/blog/top-smart-meter-supplier/
+Which refers to: https://www.blackridgeresearch.com/blog/list-of-global-top-smart-electric-electricity-gas-water-meter-companies-manufacturers-makers-suppliers-in-the-world
