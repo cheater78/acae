@@ -6,7 +6,7 @@
 	url = https://github.com/cheater78/acae-coremark.git
 [submodule "benchmark/embench/embench"]
 	path = benchmark/embench/embench
-	url = https://github.com/embench/embench-iot.git
+	url = https://github.com/cheater78/acae-embench-iot.git
 [submodule "baremetal/printf"]
 	path = baremetal/printf
 	url = https://github.com/mpaland/printf.git
