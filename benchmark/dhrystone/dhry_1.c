@@ -280,9 +280,8 @@ main ()
     static const unsigned long baseline = 1757; // VAX 11/780 baseline mesurement(at 1 MIPS), from the ancient times
     const double DMIPS = (double)Dhrystones_Per_Second / (double)baseline;
     const double DMIPS_Per_MHz = DMIPS / (HZ / MICS_PER_SECOND);
-    printf("Score in DMIPS:\n");
-    printf("Score: %f\n", DMIPS);
-    printf("Score/MHz: %f\n", DMIPS_Per_MHz);
+    printf("Score: %f DMIPS\n", DMIPS);
+    printf("Score/MHz: %f DMIPS\n", DMIPS_Per_MHz);
     // ~EDIT
   }
   

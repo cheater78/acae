@@ -67,17 +67,18 @@ def wipe_benchmark_results():
         shutil.rmtree(results_path)
 
 
-def save_benchmark_result(platform: str, benchmark: str, iterations: int, score: float, score_per_mhz: float):
+def save_benchmark_result(platform: str, benchmark: str, iterations: int, score: float, score_per_mhz: float, unit: str):
     parent_path: str = os.path.abspath(f"{cwd}/results/{platform}")
     file_path: str = os.path.abspath(f"{parent_path}/{benchmark}.csv")
-    result: str = f"{platform},{benchmark},{iterations},{score},{score_per_mhz}"
+    header: str =  "platform,benchmark,iterations,score,score_per_mhz,unit"
+    result: str = f"{platform},{benchmark},{iterations},{score},{score_per_mhz},{unit}"
     print(f"Saving Result: {result} to file: {file_path}")
 
     os.makedirs(parent_path, exist_ok=True)
     file_new: bool = not os.path.exists(file_path)
     with open(file_path, 'a') as file:
         if file_new:
-            file.write("platform,iterations,score,score_per_mhz\n")
+            file.write(f"{header}\n")
         file.write(f"{result}\n")
 
 def save_benchmark_output(platform: str, benchmark: str, iterations: int, log: str) -> None:
@@ -89,45 +90,76 @@ def save_benchmark_output(platform: str, benchmark: str, iterations: int, log: s
     with open(file_path, 'w') as file:
         file.write(f"{log}")
 
+def get_suite_benchmarks(suite: str) -> list[str]:
+    suite_path: str = f"{acae_path}/benchmark/{suite}"
+    cmd: str = f"make -C {suite_path} list"
 
-def run_benchmark(platform: str, benchmark: str, iterations: int) -> None:
-    benchmark_path: str = f"{acae_path}/benchmark/{benchmark}"
-    cmd: str = f"PLATFORM={platform} ITERATIONS={iterations} make -C {benchmark_path} clean build run"
-    
     output = run_cmd(cmd)
 
-    score: int = -1
-    score_per_mhz: int = -1
+    suite_benchmarks: list[str] = []
     for line in output:
-        score_match = re.search(r"Score:\s*([0-9.]+)", line)
-        score_per_mhz_match = re.search(r"Score/MHz:\s*([0-9.]+)", line)
-
-        if score_match:
-            if score != -1:
-                print("Score appeared twice!")
-                exit(1)
-            score = float(score_match.group(1))
+        if line.startswith("make:"):
             continue
-        if score_per_mhz_match:
-            if score_per_mhz != -1:
-                print("Score appeared twice!")
-                exit(1)
-            score_per_mhz = float(score_per_mhz_match.group(1))
-            continue
+        suite_benchmarks.append(line.strip())
     
-    if score == -1 or score_per_mhz == -1:
-        print("Score or Score/MHz was not found!")
-        exit(1)
+    return suite_benchmarks
 
-    save_benchmark_result(platform, benchmark, iterations, score, score_per_mhz)
-    save_benchmark_output(platform, benchmark, iterations, "".join(output))
+def run_benchmark(platform: str, benchmark: str, iterations: int, suite_benchmark: str | None = None) -> None:
+    
+    suite_benchmarks:  list[str] = get_suite_benchmarks(benchmark)
+
+    if len(suite_benchmarks) < 1:
+        raise RuntimeError(f"Benchmark {benchmark} did not list its benchmarks! (Even non suite BMs need to report themselves)")
+
+    is_suite: bool = len(suite_benchmarks) > 1
+    benchmark_path: str = f"{acae_path}/benchmark/{benchmark}" # both bm/suite path
+    
+    if is_suite and (suite_benchmark is not None):
+        if suite_benchmark not in suite_benchmarks:
+            raise RuntimeError(f"Provided suite benchmark {suite_benchmark} is not part of {benchmark}!")
+        suite_benchmarks = [ suite_benchmark ]
+
+    for bench in suite_benchmarks:
+        cmd: str = f"PLATFORM={platform} ITERATIONS={iterations} BENCHMARK={bench} make -C {benchmark_path} all"
+
+        output = run_cmd(cmd)
+
+        score: float = -1
+        score_per_mhz: float = -1
+        unit: str = ""
+        for line in output:
+            score_match = re.search(r"Score:\s*([0-9.]+)\s*(\S+)", line)
+            score_per_mhz_match = re.search(r"Score/MHz:\s*([0-9.]+)\s*(\S+)", line)
+
+            if score_match:
+                if score != -1:
+                    print("Score appeared twice!")
+                    exit(1)
+                score = float(score_match.group(1))
+                unit = str(score_match.group(2))
+                continue
+            if score_per_mhz_match:
+                if score_per_mhz != -1:
+                    print("Score appeared twice!")
+                    exit(1)
+                score_per_mhz = float(score_per_mhz_match.group(1))
+                unit = str(score_per_mhz_match.group(2))
+                continue
+        
+        if score == -1 or score_per_mhz == -1 or unit == "":
+            print("Score or Score/MHz or unit was not found!")
+            exit(1)
+
+        benchmark_tag: str = f"{benchmark}-{bench}" if is_suite else benchmark
+        save_benchmark_result(platform, benchmark_tag, iterations, score, score_per_mhz, unit)
+        save_benchmark_output(platform, benchmark_tag, iterations, "".join(output))
 
 def run_benchmark_series(platform: str, benchmark: str, iterations: list[int]) -> None:
     for iteration_count in iterations:
         run_benchmark(platform, benchmark, iteration_count)
         
 def run_benchmark_series_nondeterministic(platform: str, benchmark: str, iterations: list[int], samples: int = 3) -> None:
-    for sample in range(0, samples):
+    for _ in range(0, samples):
         run_benchmark_series(platform, benchmark, iterations)
 
 
@@ -138,6 +170,7 @@ platforms: list[str] = [
 benchmarks: list[str] = [
     "dhrystone",
     "coremark",
+    "embench",
 ]
 
 # uncomment what you need
@@ -161,6 +194,10 @@ iterations = create_iterations(start = 0, steps = 12, step_pow2 = True)
 #run_benchmark_series_nondeterministic("native","coremark",iterations)
 #run_benchmark_series("acae","coremark",iterations)
 #run_benchmark_series_nondeterministic("acae","coremark",iterations)
+
+iterations = create_iterations(start = 0, steps = 12, step_pow2 = True)
+#run_benchmark_series("native", "embench", iterations)
+run_benchmark_series("acae", "embench", iterations)
 
 ## DEBUG / TEST
 #run_benchmark("acae","dhrystone",1)

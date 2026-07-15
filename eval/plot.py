@@ -1,5 +1,7 @@
 #!/usr/bin/python3 
 import os
+import subprocess
+import select
 import numpy as np
 import pandas as pd
 
@@ -16,10 +18,69 @@ acae_path: str = os.path.abspath(f"{eval_path}/..")
 results_path: str = os.path.abspath(f"{eval_path}/results")
 plot_path: str = os.path.abspath(f"{eval_path}/plots")
 
+def run_cmd(cmd: str, silent: bool = False) -> list[str]:
+    with subprocess.Popen(
+        cmd,
+        shell=True,
+        text=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE) as process:
+        output_lines: list[str] = []
+        stdout_closed = False
+        stderr_closed = False
+        while True:
+            fds = []
+            if not stdout_closed:
+                fds.append(process.stdout)
+            if not stderr_closed:
+                fds.append(process.stderr)
+            if not fds:
+                break
+            rlist, _, _ = select.select(fds, [], [])
+            
+            for stream in rlist:
+                line = stream.readline()
+                if line:
+                    print(line, end='')
+                    output_lines.append(line)
+                else:
+                    if stream == process.stdout:
+                        process.stdout.close()
+                        stdout_closed = True
+                    if stream == process.stderr:
+                        process.stderr.close()
+                        stderr_closed = True
+
+            if stdout_closed and stderr_closed and process.poll() is not None:
+                break
+
+        return output_lines
+
+def get_suite_benchmarks(suite: str) -> list[str]:
+    suite_path: str = f"{acae_path}/benchmark/{suite}"
+    cmd: str = f"make -C {suite_path} list"
+
+    output = run_cmd(cmd)
+
+    suite_benchmarks: list[str] = []
+    for line in output:
+        if line.startswith("make:"):
+            continue
+        suite_benchmarks.append(line.strip())
+    
+    return suite_benchmarks
+
 platforms: list[str] = [
     "acae",
     "native",
 ]
+
+suites: list[str] = [
+    "embench"
+]
+suite_units: dict [str, str] = {
+    "embench": "µs/iteration",
+}
 
 benchmarks: list[str] = [
     "dhrystone",
@@ -30,6 +91,12 @@ benchmark_units: dict [str, str] = {
     "dhrystone": "DMIPS",
     "coremark": "CoreMark",
 }
+# add suite benchmarks by their tag
+for suite in suites:
+    for bench in get_suite_benchmarks(suite):
+        benchmark_tag: str = f"{suite}-{bench}"
+        benchmarks.append(benchmark_tag)
+        benchmark_units[benchmark_tag] = suite_units[suite]
 
 def capitalize(s: str, all: bool = False):
     if not s:
@@ -205,13 +272,16 @@ def plot_benchmark_platform_comparison(benchmark: str) -> None:
     plot_file: str = os.path.abspath(f"{plot_path}/{benchmark}_comp.pdf")
     parent_path: str = os.path.abspath(f"{plot_path}")
     
+    reference_file: str = os.path.abspath(f"{eval_path}/reference/native/{benchmark}.csv")
+    reference_available: bool = os.path.exists(reference_file)
+
     dataset_files: list[str] = \
         [ os.path.abspath(f"{results_path}/{platform}/{benchmark}.csv") for platform in platforms ] + \
-        [ os.path.abspath(f"{eval_path}/reference/native/{benchmark}.csv") ]
+        ([ reference_file ] if reference_available else [])
     datasets = [ pd.read_csv(dataset_file) for dataset_file in dataset_files ]
 
     dataset = pd.DataFrame()
-    dataset["platform"] = [ (p if p != "acae" else "ACAE") for p in platforms ] + [ "reference" ]
+    dataset["platform"] = [ (p if p != "acae" else "ACAE") for p in platforms ] + ([ "reference" ] if reference_available else [])
     
     # consider the avg. score of max iterations for each platform
     avgd_dataset = [ dataset[dataset['iterations'] == dataset['iterations'].max()]['score'].mean() for dataset in datasets ]
@@ -235,14 +305,35 @@ def plot_benchmark_platform_comparison(benchmark: str) -> None:
 
 ######################################################################################################################
 
+def plot_suite_benchmarks(platform: str, suite: str) -> None:
+    suite_benchmarks: list[str] = get_suite_benchmarks(suite)
+
+    for bench in suite_benchmarks:
+        benchmark_tag: str = f"{suite}-{bench}"
+        plot_benchmark(platform, benchmark_tag)
+
+def plot_suite_platform_comparisons(suite: str) -> None:
+    suite_benchmarks: list[str] = get_suite_benchmarks(suite)
+
+    for bench in suite_benchmarks:
+        benchmark_tag: str = f"{suite}-{bench}"
+        plot_benchmark_platform_comparison(benchmark_tag)
+
+######################################################################################################################
+
 # individual avg benchmark score per iterations bar plots
-plot_benchmark("acae", "dhrystone")
-plot_benchmark("acae", "coremark")
-plot_benchmark("native", "dhrystone")
-plot_benchmark("native", "coremark")
+# plot_benchmark("acae", "dhrystone")
+# plot_benchmark("acae", "coremark")
+# plot_benchmark("native", "dhrystone")
+# plot_benchmark("native", "coremark")
 
 # Platform comparison per benchmark bar plots
-plot_benchmark_platform_comparison("dhrystone")
-plot_benchmark_platform_comparison("coremark")
+# plot_benchmark_platform_comparison("dhrystone")
+# plot_benchmark_platform_comparison("coremark")
+
+plot_suite_benchmarks("acae", "embench")
+plot_suite_benchmarks("native", "embench")
+
+plot_suite_platform_comparisons("embench")
 
 #plt.show()

@@ -1,0 +1,13 @@
+platform,benchmark,iterations,score,score_per_mhz,unit
+native,embench-nettle-aes,1,1540.0,15.0,us/iteration
+native,embench-nettle-aes,2,1539.0,15.0,us/iteration
+native,embench-nettle-aes,4,1539.0,15.0,us/iteration
+native,embench-nettle-aes,8,1539.0,15.0,us/iteration
+native,embench-nettle-aes,16,1539.0,15.0,us/iteration
+native,embench-nettle-aes,32,1539.0,15.0,us/iteration
+native,embench-nettle-aes,64,1539.0,15.0,us/iteration
+native,embench-nettle-aes,128,1539.0,15.0,us/iteration
+native,embench-nettle-aes,256,1539.0,15.0,us/iteration
+native,embench-nettle-aes,512,1539.0,15.0,us/iteration
+native,embench-nettle-aes,1024,1539.0,15.0,us/iteration
+native,embench-nettle-aes,2048,1539.0,15.0,us/iteration

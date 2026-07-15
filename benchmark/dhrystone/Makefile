@@ -49,6 +49,8 @@ $(TARGET): $(OBJS)
 .PHONY: all clean build run
 clean:
 	rm -rf $(OUTPATH)
+list:
+	@echo dhrystone
 build: $(TARGET)
 
 # RUN target

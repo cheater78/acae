@@ -1,0 +1,13 @@
+platform,benchmark,iterations,score,score_per_mhz,unit
+acae,embench-st,1,2885.0,28.0,us/iteration
+acae,embench-st,2,2885.0,28.0,us/iteration
+acae,embench-st,4,2885.0,28.0,us/iteration
+acae,embench-st,8,2885.0,28.0,us/iteration
+acae,embench-st,16,2885.0,28.0,us/iteration
+acae,embench-st,32,2885.0,28.0,us/iteration
+acae,embench-st,64,2885.0,28.0,us/iteration
+acae,embench-st,128,2885.0,28.0,us/iteration
+acae,embench-st,256,2885.0,28.0,us/iteration
+acae,embench-st,512,2885.0,28.0,us/iteration
+acae,embench-st,1024,2885.0,28.0,us/iteration
+acae,embench-st,2048,2885.0,28.0,us/iteration

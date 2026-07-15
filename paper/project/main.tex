@@ -1,0 +1,180 @@
+\documentclass[english]{tudscrartcl}
+
+\usepackage{graphicx}
+\graphicspath{
+	{./resources/}
+	{./resources/tud_logo_svg_rgb/Blau/}
+	{./resources/tud_logo_svg_rgb/Schwarz/}
+	{./resources/tud_logo_svg_rgb/Weiss/}
+	{./resources/plots/}
+	{./resources/plots/acae}
+	{./resources/plots/native}
+}
+
+% This was taken from tudscr src to change the TUD logo to the new one (TUD Corporate Design)
+\makeatletter
+\renewcommand*\tud@mainlogo@set{ % changed to override the exiting cmd
+  \if@tud@mainlogo@set%
+    \def\@tempa{\includegraphics[keepaspectratio,width=\tud@dim@logowidth]}%
+    \tud@savelayerbox{main@black}{\@tempa{TUD_Logo_RGB_horizontal_schwarz_en}}%
+    \tud@savelayerbox{main@HKS41}{\@tempa{TUD_Logo_RGB_horizontal_blau_en}}%
+    \tud@savelayerbox{main@white}{\@tempa{TUD_Logo_RGB_horizontal_weiss_en}}%
+    \settoheight\tud@dim@mainlogoheight{\tud@uselayerbox{main@black}}%
+    \global\tud@dim@mainlogoheight=\tud@dim@mainlogoheight%
+    \gdef\tud@mainlogo@wrn##1{%
+      \ifdim##1<\ta@bcor\relax%
+        \ClassWarning{\TUD@Class@Name}{%
+          The selected page layout means that the\MessageBreak%
+          logo of TUD extends beyond the printing area. \MessageBreak%
+          The inner margin is smaller than BCOR\MessageBreak%
+          (`BCOR=\the\ta@bcor', inner margin is \the##1)\MessageBreak%
+          Maybe you should decrease the current value\MessageBreak%
+          of DIV (`DIV=\the\ta@div')%
+        }
+        \global\let\tud@mainlogo@wrn\@gobble%
+      \fi%
+    }%
+    \tud@headlogo@set%
+    \global\@tud@footlogo@option@settrue%
+    \tud@footlogo@option@set%
+    \global\@tud@mainlogo@setfalse%
+  \fi
+}
+\makeatother
+% ~This was taken from tudscr src to change the TUD logo to the new one (TUD Corporate Design)
+
+\usepackage{babel}
+\usepackage[babel]{microtype}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{clrscode}
+\usepackage{xcolor}
+\usepackage{tabularx}
+\usepackage{array}
+\usepackage{xurl}
+\usepackage{subcaption}
+\usepackage{acronym}
+\usepackage{hyperref}
+\hypersetup{
+    colorlinks,
+    citecolor=black,
+    filecolor=black,
+    linkcolor=black,
+    urlcolor=black
+}
+\usepackage[backend=biber,style=numeric,sorting=none]{biblatex}
+\addbibresource{references.bib}
+
+% smart metering
+\acrodef{SG}{smart grid}
+\acrodef{AMI}{advanced metering infrastructure}
+\acrodef{MDMS}{meter data management system}
+\acrodef{CE}{central entity}
+\acrodef{SM}{smart meter}
+\acrodef{SMGW}{smart meter gateway}
+
+% hardware
+\acrodef{HW}{hardware}
+\acrodef{MCU}{microcontroller unit}
+\acrodef{CPU}{central processing unit}
+\acrodef{RAM}{random access memory}
+\acrodef{NVIC}{nested vectored interrupt controller}
+\acrodef{MPU}{memory protection unit}
+\acrodef{FPU}{floating-point unit}
+\acrodef{RTL}{register-transfer-level}
+\acrodef{ADC}{analog-to-digital converter}
+\acrodef{RTC}{real-time clock}
+\acrodef{RMS}{root-mean-square}
+\acrodef{ISA}{instruction set architecture}
+
+\acrodef{PLL}{phase-locked loop}
+\acrodef{HSE}{high speed external}
+\acrodef{UART}{Universal Asynchronous Receiver-Transmitter}
+
+% software
+\acrodef{OS}{operating system}
+\acrodef{RT-OS}{real-time operating system}
+\acrodef{STD}{C standard library}
+
+% simulation
+\acrodef{ISS}{instruction-set-simulator}
+\acrodef{TB}{translation block}
+
+% benchmark
+\acrodef{DMIPS}{Dhrystone mega instructions per second}
+\acrodef{EEMBC}{embedded microprocessor benchmark consortium}
+
+% acae
+\acrodef{ACAE}{ARM cycle accounting emulator}
+
+\begin{document}
+
+	\addtokomafont{subject}{\sffamily}
+	\title{Project title: from task desc.}
+	\author{Jakob Fregin}
+	\date{August 2026}
+
+  	\maketitle
+  	\pagenumbering{arabic}
+
+	%\clearpage
+	
+	\section{TODO}
+		- double col 6-8p. \\
+		- technical report, less backroung more refs. \\
+		- content: \\
+			what was done?
+			how was it done?
+			how to repoduce?
+			why even, what's notable (e.g. compared to our existing measurements)
+			results: some proof of work, no you don't need to calculate hashes on paper and hope for zeros
+		- goal:
+			- (me) a broader dataset usable for cycle model improvements based on workloads comparable to real world deployments
+			- as question: How does the performance gap of acae translate to real world representative workloads
+			- plots:
+				- each 
+			- future work:
+				- maybe we can even provide some guidelines to performance measurements to improve acae
+				- explicitly which configurations represent proper measurements and which to avoid
+				
+
+		Wenn dein Ziel also z.B. ist, die Relevanz von Embench im Vergleich mit Coremark festzustellen, wären Differenzen zwischen den beiden Benchmarks spannend.
+		Oder wenn ich mit Embench z.B. den zeitlichen Ablauf besser erforschen kann, dann wäre ein Plot für die Zeit gut. Usw....
+
+	\section{STACK}
+		SECTIONS: \\
+		- Intro / Motivation / bit of Background / our work \\
+		- Results
+
+		Motivation: \\
+		ACAE currently deviates from real HW performance as proven by (ref ACEA) using Dhrystone and CoreMark
+		In order to improve ACEA to be useful for accurate performance measurements for e.g. rapid prototyping or scientific research both omitting the use of HW,
+		a broader view on comparable performance data is needed.
+		This data should be measured using close to real world workloads, to ensure that measured loads are represented properly by our cycle model.
+		\\
+		Embench!
+		is a suite
+		provides broader workloads
+		is explicitly built for embedded systems
+		built on BEEBs
+		aims to provide real world workloads
+		runs on hot caches to represent real world workloads better -> (WILD CLAIM - SOURCE?) e.g. SHA256 performance is comparable to real deployments
+		\\
+		Work: \\
+		using ACAE in its state as of presented in (ref ACEA) + slight compatibility changes (WHICH? - check git log + diff)
+		we integrated embench as a benchmark suite
+		\\
+		CHANGES:
+		acae:\\
+		- adjusted Make-System to accomodate benchmark suites by adding the "list" target providing a list of all benchmarks a suite offers
+		embench:\\
+		- discarded the python harness -> acae provides its own build system
+		\\
+
+	\section{Introduction}
+		\label{sec:intro}
+		Something profound goes here. \\
+	
+	\printbibliography
+
+\end{document}

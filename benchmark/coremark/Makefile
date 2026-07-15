@@ -51,6 +51,8 @@ $(TARGET): $(OBJS)
 .PHONY: all clean build run
 clean:
 	rm -rf $(OUTPATH)
+list:
+	@echo coremark
 build: $(TARGET)
 
 # RUN target

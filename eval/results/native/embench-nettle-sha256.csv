@@ -1,0 +1,13 @@
+platform,benchmark,iterations,score,score_per_mhz,unit
+native,embench-nettle-sha256,1,174.0,1.0,us/iteration
+native,embench-nettle-sha256,2,173.0,1.0,us/iteration
+native,embench-nettle-sha256,4,173.0,1.0,us/iteration
+native,embench-nettle-sha256,8,173.0,1.0,us/iteration
+native,embench-nettle-sha256,16,173.0,1.0,us/iteration
+native,embench-nettle-sha256,32,173.0,1.0,us/iteration
+native,embench-nettle-sha256,64,173.0,1.0,us/iteration
+native,embench-nettle-sha256,128,173.0,1.0,us/iteration
+native,embench-nettle-sha256,256,173.0,1.0,us/iteration
+native,embench-nettle-sha256,512,173.0,1.0,us/iteration
+native,embench-nettle-sha256,1024,173.0,1.0,us/iteration
+native,embench-nettle-sha256,2048,173.0,1.0,us/iteration

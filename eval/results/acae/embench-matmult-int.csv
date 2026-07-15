@@ -1,0 +1,13 @@
+platform,benchmark,iterations,score,score_per_mhz,unit
+acae,embench-matmult-int,1,3478.0,34.0,us/iteration
+acae,embench-matmult-int,2,3478.0,34.0,us/iteration
+acae,embench-matmult-int,4,3478.0,34.0,us/iteration
+acae,embench-matmult-int,8,3478.0,34.0,us/iteration
+acae,embench-matmult-int,16,3477.0,34.0,us/iteration
+acae,embench-matmult-int,32,3477.0,34.0,us/iteration
+acae,embench-matmult-int,64,3477.0,34.0,us/iteration
+acae,embench-matmult-int,128,3477.0,34.0,us/iteration
+acae,embench-matmult-int,256,3477.0,34.0,us/iteration
+acae,embench-matmult-int,512,3477.0,34.0,us/iteration
+acae,embench-matmult-int,1024,3477.0,34.0,us/iteration
+acae,embench-matmult-int,2048,3477.0,34.0,us/iteration

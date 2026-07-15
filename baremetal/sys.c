@@ -94,3 +94,7 @@ void _fini() {
 inline byte* get_heap_end() {
     return __heap_end__;
 }
+
+inline void exit(int status) {
+    _exit(status);
+}
