@@ -3,12 +3,6 @@
 
 extern int main();
 
-#include "stm32f4xx.h"
-#include "stm32f4xx_ll_rcc.h"
-#include "stm32f4xx_ll_bus.h"
-#include "stm32f4xx_ll_gpio.h"
-#include "stm32f4xx_ll_usart.h"
-
 void RESET_handler() {
     platform_preinit();
     // boot
