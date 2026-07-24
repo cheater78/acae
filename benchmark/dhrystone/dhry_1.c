@@ -58,10 +58,10 @@ extern long     time();
 #endif
 
 // EDIT: changed long -> ulong, float -> double
-unsigned long   Begin_Time,
-                End_Time,
-                User_Time;
-double          Microseconds,
+volatile unsigned long Begin_Time,
+                       End_Time,
+                       User_Time;
+volatile double Microseconds,
                 Dhrystones_Per_Second;
 
 /* end of variables for time measurement */

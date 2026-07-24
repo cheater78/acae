@@ -17,6 +17,5 @@
 // dwt helpers
 void init_dwt();
 
-static inline unsigned long dwt_cyccnt() {
-    return DWT_CYCCNT;
-}
+// moved to a real symbol for acae's detection in qemu -> will cause some call overhead (guestimate: 3-5 cycles + pipline)
+unsigned long dwt_cyccnt();

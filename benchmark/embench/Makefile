@@ -111,6 +111,7 @@ list:
 endif
 
 clean:
+	rm -rf $(BMOUTPATH)
 	rm -rf $(OUTPATH)
 
 build: $(TARGET)

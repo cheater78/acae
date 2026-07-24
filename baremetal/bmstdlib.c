@@ -21,7 +21,7 @@ int strcmp(const char *s1, const char *s2) {
     return (unsigned char)*s1 - (unsigned char)*s2;
 }
 // memory.h
-void* malloc(unsigned long size) {
+void* malloc(unsigned int size) {
     extern void* _sbrk(ptrdiff_t incr);
     size = (size + 7) & ~7; // align
     void* new_heap_max = _sbrk(size);
@@ -39,6 +39,14 @@ clock_t times(struct tms *buffer) {
         buffer->tms_cutime = 0;
         buffer->tms_cstime = 0;
     }
+    /*
+    NOTE: These are the magic prints
+    If Dhrystone ever measures 0 on all dwt_cyccnt calls:
+    1. uncomment these prints, build, and run
+    2. comment again, build, and run
+    Don't ask me why, I looked into this and I spent too much time
+    Happy adventures traveler!
+    */
     //printf("dwt: %lu ticks\n", ticks);
     //printf("std/times: %lu ticks\n", buffer->tms_utime);
     return ticks;
