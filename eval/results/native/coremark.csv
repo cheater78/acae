@@ -1,0 +1,14 @@
+platform,benchmark,iterations,score,score_per_mhz,unit
+native,coremark,1,57.501436,0.575014,CoreMark
+native,coremark,2,57.499717,0.574997,CoreMark
+native,coremark,4,57.50423,0.575042,CoreMark
+native,coremark,8,57.499907,0.574999,CoreMark
+native,coremark,16,57.496805,0.574968,CoreMark
+native,coremark,32,57.498633,0.574986,CoreMark
+native,coremark,64,57.498199,0.574982,CoreMark
+native,coremark,128,57.499704,0.574997,CoreMark
+native,coremark,256,57.499937,0.574999,CoreMark
+native,coremark,512,57.500188,0.575002,CoreMark
+native,coremark,1024,57.500207,0.575002,CoreMark
+native,coremark,2048,57.500274,0.575003,CoreMark
+native,coremark,4096,144.813129,1.448131,CoreMark

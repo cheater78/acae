@@ -1,0 +1,14 @@
+platform,benchmark,iterations,score,score_per_mhz,unit
+native,embench-picojpeg,1,25628.0,256.0,us/iteration
+native,embench-picojpeg,2,25628.0,256.0,us/iteration
+native,embench-picojpeg,4,25628.0,256.0,us/iteration
+native,embench-picojpeg,8,25628.0,256.0,us/iteration
+native,embench-picojpeg,16,25628.0,256.0,us/iteration
+native,embench-picojpeg,32,25628.0,256.0,us/iteration
+native,embench-picojpeg,64,25627.0,256.0,us/iteration
+native,embench-picojpeg,128,25627.0,256.0,us/iteration
+native,embench-picojpeg,256,25627.0,256.0,us/iteration
+native,embench-picojpeg,512,25627.0,256.0,us/iteration
+native,embench-picojpeg,1024,25627.0,256.0,us/iteration
+native,embench-picojpeg,2048,4656.0,46.0,us/iteration
+native,embench-picojpeg,4096,4656.0,46.0,us/iteration

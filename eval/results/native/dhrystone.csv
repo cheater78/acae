@@ -1,0 +1,14 @@
+platform,benchmark,iterations,score,score_per_mhz,unit
+native,dhrystone,1,24.312344,0.243123,DMIPS
+native,dhrystone,2,24.842949,0.248429,DMIPS
+native,dhrystone,4,25.117033,0.25117,DMIPS
+native,dhrystone,8,25.256355,0.252564,DMIPS
+native,dhrystone,16,25.326598,0.253266,DMIPS
+native,dhrystone,32,25.361865,0.253619,DMIPS
+native,dhrystone,64,25.379536,0.253795,DMIPS
+native,dhrystone,128,25.388381,0.253884,DMIPS
+native,dhrystone,256,25.427016,0.25427,DMIPS
+native,dhrystone,512,25.429146,0.254291,DMIPS
+native,dhrystone,1024,25.430211,0.254302,DMIPS
+native,dhrystone,2048,25.430744,0.254307,DMIPS
+native,dhrystone,4096,25.43101,0.25431,DMIPS

@@ -1,0 +1,14 @@
+platform,benchmark,iterations,score,score_per_mhz,unit
+acae,embench-cubic,1,3928.0,39.0,us/iteration
+acae,embench-cubic,2,3928.0,39.0,us/iteration
+acae,embench-cubic,4,3928.0,39.0,us/iteration
+acae,embench-cubic,8,3928.0,39.0,us/iteration
+acae,embench-cubic,16,3928.0,39.0,us/iteration
+acae,embench-cubic,32,3928.0,39.0,us/iteration
+acae,embench-cubic,64,3928.0,39.0,us/iteration
+acae,embench-cubic,128,3928.0,39.0,us/iteration
+acae,embench-cubic,256,3928.0,39.0,us/iteration
+acae,embench-cubic,512,3928.0,39.0,us/iteration
+acae,embench-cubic,1024,3928.0,39.0,us/iteration
+acae,embench-cubic,2048,3928.0,39.0,us/iteration
+acae,embench-cubic,4096,3928.0,39.0,us/iteration

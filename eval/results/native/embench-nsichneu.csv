@@ -1,0 +1,14 @@
+platform,benchmark,iterations,score,score_per_mhz,unit
+native,embench-nsichneu,1,83.0,0.0,us/iteration
+native,embench-nsichneu,2,83.0,0.0,us/iteration
+native,embench-nsichneu,4,82.0,0.0,us/iteration
+native,embench-nsichneu,8,82.0,0.0,us/iteration
+native,embench-nsichneu,16,82.0,0.0,us/iteration
+native,embench-nsichneu,32,82.0,0.0,us/iteration
+native,embench-nsichneu,64,82.0,0.0,us/iteration
+native,embench-nsichneu,128,82.0,0.0,us/iteration
+native,embench-nsichneu,256,82.0,0.0,us/iteration
+native,embench-nsichneu,512,82.0,0.0,us/iteration
+native,embench-nsichneu,1024,82.0,0.0,us/iteration
+native,embench-nsichneu,2048,82.0,0.0,us/iteration
+native,embench-nsichneu,4096,82.0,0.0,us/iteration

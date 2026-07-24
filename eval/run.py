@@ -182,7 +182,7 @@ benchmarks: list[str] = [
 ## DHRYSTONE
 # Iterations = N[2⁰,2²⁰] (MIN: iter = 2⁰ (ALLOW_INVALID_RUNS), MAX: iter > ~2²⁰ -> cyccnt OF)
 iterations = create_iterations(start = 0, steps = 13, step_pow2 = True)
-#run_benchmark_series("native","dhrystone",iterations)
+run_benchmark_series("native","dhrystone",iterations)
 #run_benchmark_series_nondeterministic("native","dhrystone",iterations)
 run_benchmark_series("acae","dhrystone",iterations)
 #run_benchmark_series_nondeterministic("acae","dhrystone",iterations)
