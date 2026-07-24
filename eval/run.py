@@ -181,22 +181,22 @@ benchmarks: list[str] = [
 
 ## DHRYSTONE
 # Iterations = N[2⁰,2²⁰] (MIN: iter = 2⁰ (ALLOW_INVALID_RUNS), MAX: iter > ~2²⁰ -> cyccnt OF)
-iterations = create_iterations(start = 0, steps = 21, step_pow2 = True)
+iterations = create_iterations(start = 0, steps = 13, step_pow2 = True)
 #run_benchmark_series("native","dhrystone",iterations)
 #run_benchmark_series_nondeterministic("native","dhrystone",iterations)
-#run_benchmark_series("acae","dhrystone",iterations)
+run_benchmark_series("acae","dhrystone",iterations)
 #run_benchmark_series_nondeterministic("acae","dhrystone",iterations)
 
 ## COREMARK
 # Iterations = N[2⁰,2¹¹] (MIN: iter = 2⁰ (ALLOW_INVALID_RUNS), MAX: iter > ~3500 > 2¹¹ -> cyccnt OF)
-iterations = create_iterations(start = 0, steps = 12, step_pow2 = True)
-#run_benchmark_series("native","coremark",iterations)
+iterations = create_iterations(start = 0, steps = 13, step_pow2 = True)
+run_benchmark_series("native","coremark",iterations)
 #run_benchmark_series_nondeterministic("native","coremark",iterations)
-#run_benchmark_series("acae","coremark",iterations)
+run_benchmark_series("acae","coremark",iterations)
 #run_benchmark_series_nondeterministic("acae","coremark",iterations)
 
-iterations = create_iterations(start = 0, steps = 12, step_pow2 = True)
-#run_benchmark_series("native", "embench", iterations)
+iterations = create_iterations(start = 0, steps = 13, step_pow2 = True)
+run_benchmark_series("native", "embench", iterations)
 run_benchmark_series("acae", "embench", iterations)
 
 ## DEBUG / TEST
