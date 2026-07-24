@@ -13,10 +13,10 @@ void RESET_handler() {
     //~boot
 
     platform_init();
-    init_dwt();
-
     // Boot setup complete
     printf("\n\n"); // make some space to the potential previous garbage
+    init_dwt(); // timing init -> setup and enable cycle count register
+
     printf("ISP: %#x\n", __stack_top__);
     printf("MSP: %#x\n", get_msp());
     printf("Flash: begin: 0x%#x, used: 0x%#x / 0x%x\n", __flash_start__, __flash_end__ - __flash_start__, __flash_size__);

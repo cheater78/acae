@@ -15,12 +15,7 @@
 #define DWT_LAR     *(volatile unsigned long*) DWT_ADDR_LAR
 
 // dwt helpers
-static inline void init_dwt() {
-    // HW needs debug enabled first! -> platform_init
-    DWT_LAR = 0xC5ACCE55; // unlock DWT (not needed for qemu, but required for real hardware)
-    DWT_CYCCNT = 0;
-    DWT_CTRL = 1;
-}
+void init_dwt();
 
 static inline unsigned long dwt_cyccnt() {
     return DWT_CYCCNT;
