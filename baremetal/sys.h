@@ -63,4 +63,4 @@ static inline void exit(int status) {
 }
 
 #include <platform.h>
-#include "dwt.h"
+#include <dwt.h>

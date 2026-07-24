@@ -1,5 +1,5 @@
 #pragma once
-#include "sys.h"
+#include <sys.h>
 
 static inline void boot_copy_data() {
     const word* data_src = __data_load__;
