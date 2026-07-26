@@ -10,5 +10,3 @@ native,embench-nbody,128,36897.0,368.0,us/iteration
 native,embench-nbody,256,36900.0,369.0,us/iteration
 native,embench-nbody,512,36900.0,369.0,us/iteration
 native,embench-nbody,1024,36900.0,369.0,us/iteration
-native,embench-nbody,2048,15928.0,159.0,us/iteration
-native,embench-nbody,4096,5442.0,54.0,us/iteration

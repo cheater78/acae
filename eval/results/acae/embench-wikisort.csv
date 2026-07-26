@@ -10,5 +10,3 @@ acae,embench-wikisort,128,24582.0,245.0,us/iteration
 acae,embench-wikisort,256,24582.0,245.0,us/iteration
 acae,embench-wikisort,512,24582.0,245.0,us/iteration
 acae,embench-wikisort,1024,24582.0,245.0,us/iteration
-acae,embench-wikisort,2048,3610.0,36.0,us/iteration
-acae,embench-wikisort,4096,3610.0,36.0,us/iteration

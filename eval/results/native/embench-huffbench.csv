@@ -11,4 +11,3 @@ native,embench-huffbench,256,14321.0,143.0,us/iteration
 native,embench-huffbench,512,14321.0,143.0,us/iteration
 native,embench-huffbench,1024,14321.0,143.0,us/iteration
 native,embench-huffbench,2048,14321.0,143.0,us/iteration
-native,embench-huffbench,4096,3835.0,38.0,us/iteration

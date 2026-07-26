@@ -11,4 +11,3 @@ acae,embench-picojpeg,256,16695.0,166.0,us/iteration
 acae,embench-picojpeg,512,16695.0,166.0,us/iteration
 acae,embench-picojpeg,1024,16695.0,166.0,us/iteration
 acae,embench-picojpeg,2048,16695.0,166.0,us/iteration
-acae,embench-picojpeg,4096,6209.0,62.0,us/iteration

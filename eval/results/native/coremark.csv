@@ -11,4 +11,3 @@ native,coremark,256,57.499937,0.574999,CoreMark
 native,coremark,512,57.500188,0.575002,CoreMark
 native,coremark,1024,57.500207,0.575002,CoreMark
 native,coremark,2048,57.500274,0.575003,CoreMark
-native,coremark,4096,144.813129,1.448131,CoreMark

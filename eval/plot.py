@@ -12,6 +12,9 @@ from matplotlib.ticker import FuncFormatter
 import seaborn as sns
 import seaborn.objects as so
 
+from enum import Enum, auto
+from typing import Literal
+
 cwd: str = os.path.abspath(f"{__file__}/..")
 eval_path: str = cwd
 acae_path: str = os.path.abspath(f"{eval_path}/..")
@@ -41,7 +44,8 @@ def run_cmd(cmd: str, silent: bool = False) -> list[str]:
             for stream in rlist:
                 line = stream.readline()
                 if line:
-                    print(line, end='')
+                    if not silent:
+                        print(line, end='')
                     output_lines.append(line)
                 else:
                     if stream == process.stdout:
@@ -60,7 +64,7 @@ def get_suite_benchmarks(suite: str) -> list[str]:
     suite_path: str = f"{acae_path}/benchmark/{suite}"
     cmd: str = f"make -C {suite_path} list"
 
-    output = run_cmd(cmd)
+    output = run_cmd(cmd, silent=True)
 
     suite_benchmarks: list[str] = []
     for line in output:
@@ -75,28 +79,40 @@ platforms: list[str] = [
     "native",
 ]
 
+class Direction(Enum):
+    MoreIsBetter = auto() # score, iterations/s
+    LessIsBetter = auto() # time
+
 suites: list[str] = [
     "embench"
 ]
 suite_units: dict [str, str] = {
     "embench": "µs/iteration",
 }
+suite_direction: dict [str, Direction] = {
+    "embench": Direction.LessIsBetter,
+}
 
 benchmarks: list[str] = [
     "dhrystone",
     "coremark",
 ]
-
 benchmark_units: dict [str, str] = {
     "dhrystone": "DMIPS",
     "coremark": "CoreMark",
 }
+benchmark_direction: dict [str, Direction] = {
+    "dhrystone": Direction.MoreIsBetter,
+    "coremark": Direction.MoreIsBetter,
+}
+
 # add suite benchmarks by their tag
 for suite in suites:
     for bench in get_suite_benchmarks(suite):
         benchmark_tag: str = f"{suite}-{bench}"
         benchmarks.append(benchmark_tag)
         benchmark_units[benchmark_tag] = suite_units[suite]
+        benchmark_direction[benchmark_tag] = suite_direction[suite]
 
 def capitalize(s: str, all: bool = False):
     if not s:
@@ -154,6 +170,11 @@ def sns_bar_add_value_text(barplot) -> None:
     # -- labels did not fit horizontally
     
     for bar in barplot.patches:
+        if not bar.get_visible():
+            continue
+        if bar.get_height() == 0:
+            continue
+        # real bar
         bar_pos_x = bar.get_x()
         bar_width = bar.get_width()
         bar_height = bar.get_height()
@@ -321,19 +342,152 @@ def plot_suite_platform_comparisons(suite: str) -> None:
 
 ######################################################################################################################
 
-# individual avg benchmark score per iterations bar plots
-# plot_benchmark("acae", "dhrystone")
-# plot_benchmark("acae", "coremark")
-# plot_benchmark("native", "dhrystone")
-# plot_benchmark("native", "coremark")
+def plot_all_benchmark_deviation() -> None:
+    plot_file: str = os.path.abspath(f"{plot_path}/deviations.pdf")
+    parent_path: str = os.path.abspath(f"{plot_path}")
 
-# Platform comparison per benchmark bar plots
-# plot_benchmark_platform_comparison("dhrystone")
-# plot_benchmark_platform_comparison("coremark")
+    dataset_files: list[str] = [
+        os.path.abspath(f"{results_path}/{platform}/{benchmark}.csv") \
+        for platform in platforms \
+        for benchmark in benchmarks
+    ]
+
+    datasets: list[pd.DataFrame] = [pd.read_csv(dataset_file) for dataset_file in dataset_files]
+    dataset = pd.concat(datasets, ignore_index=True)
+
+    # optional - cleanup (shouldnt have anything else)
+    dataset = dataset[dataset["platform"].isin(["native", "acae"])]
+
+    # find maximum iteration with both platforms
+    valid_iterations = (
+        dataset.groupby(["benchmark", "iterations", "unit"])["platform"]
+        .nunique()
+        .reset_index(name="n_platforms")
+    )
+
+    # should never have another platform
+    valid_iterations = valid_iterations[
+        valid_iterations["n_platforms"] == 2
+    ]
+
+    # highest valid iteration per benchmark (+unit)
+    max_iterations = (
+        valid_iterations.groupby(["benchmark", "unit"])["iterations"]
+        .max()
+        .reset_index()
+    )
+
+    # Keep only those rows
+    dataset = dataset.merge(
+        max_iterations,
+        on=["benchmark", "unit", "iterations"],
+        how="inner",
+    )
+
+    # Put native and acae scores side-by-side
+    comparison = dataset.pivot_table(
+        index=["benchmark", "iterations", "unit"],
+        columns="platform",
+        values="score"
+    ).reset_index()
+
+    print(comparison[["benchmark", "iterations", "unit", "native", "acae"]])
+
+    # Calculate relative deviations in both directions
+    # correct for Direction = MoreIsBetter | LessIsBetter
+    def performance_delta_percent(row: pd.Series, baseline: Literal["acae"] | Literal["native"]) -> float:
+        measurement: str = ""
+        if baseline == "acae":
+            measurement = "native"
+        else:
+            measurement = "acae"
+
+        if benchmark_direction[row["benchmark"]] == Direction.MoreIsBetter:
+            # already MoreIsBetter -> just relative, convert to percent
+            return (row[measurement] - row[baseline]) / row[baseline] * 100
+        else:
+            # LessIsBetter -> inverse relative, making it MoreIsBetter + convert to percent
+            return (row[baseline] - row[measurement]) / row[baseline] * 100
+
+    def performance_delta_percent_ref_to_native(row: pd.Series) -> float:
+        return performance_delta_percent(row=row, baseline="native")
+    def performance_delta_percent_ref_to_acae(row: pd.Series) -> float:
+        return performance_delta_percent(row=row, baseline="acae")
+
+    # direction corrected performance(MoreIsBetter) of native relative to acea
+    comparison["native_deviation"] = comparison.apply(performance_delta_percent_ref_to_acae, axis=1)
+    # direction corrected performance(MoreIsBetter) of acea relative to native
+    comparison["acae_deviation"] = comparison.apply(performance_delta_percent_ref_to_native, axis=1)
+
+    # Split the column -> for hue
+    benchmark_map: dict[str, tuple[str, str]] = {}
+    for suite in suites:
+        for full_benchmark in benchmarks:
+            if full_benchmark.startswith(f"{suite}-"):
+                benchmark_name = full_benchmark[len(suite) + 1:]
+                benchmark_map[full_benchmark] = (suite, benchmark_name)
+    
+    def split_suite_benchmark(full_benchmark: str) -> tuple[str, str]:
+            # return the tuple mapped or just (suite=benchmark, benchmark)
+            return benchmark_map.get(full_benchmark, (full_benchmark, full_benchmark))
+    comparison[["suite", "benchmark"]] = pd.DataFrame(
+        comparison["benchmark"].apply(split_suite_benchmark).tolist(),
+        index=comparison.index,
+    )
+
+    # Final dataframe for plotting
+    plot_dataframe = comparison[
+        [
+            "suite",
+            "benchmark",
+            "iterations",
+            "unit",
+            "native",
+            "acae",
+            "native_deviation",
+            "acae_deviation",
+        ]
+    ]
+
+    plt.figure()
+    deviation_bar_plt = sns.barplot(
+        x="benchmark",
+        y="acae_deviation",
+        hue="suite",
+        data=plot_dataframe,
+        # errorbar=None,
+        legend=True
+    )
+    sns_bar_add_value_text(deviation_bar_plt)
+
+    plt.xticks(rotation=45, ha="right")
+    plt.subplots_adjust(
+        bottom=0.3,  # more room for x labels
+        top=0.9      # more room for title
+    )
+
+    plt.xlabel("benchmark")
+    plt.ylabel("deviation")
+    plt.title(f"Deviation of ACAE relative to native (in %)")
+
+    os.makedirs(parent_path, exist_ok=True)
+    plt.savefig(f"{plot_file}", format="pdf", transparent=True)
+
+######################################################################################################################
+
+# individual avg benchmark score per iterations bar plots
+plot_benchmark("acae", "dhrystone")
+plot_benchmark("native", "dhrystone")
+plot_benchmark_platform_comparison("dhrystone")
+
+plot_benchmark("acae", "coremark")
+plot_benchmark("native", "coremark")
+plot_benchmark_platform_comparison("coremark")
 
 plot_suite_benchmarks("acae", "embench")
 plot_suite_benchmarks("native", "embench")
-
 plot_suite_platform_comparisons("embench")
 
-#plt.show()
+plot_all_benchmark_deviation()
+
+# plt.show()

@@ -10,5 +10,3 @@ native,embench-qrduino,128,21843.0,218.0,us/iteration
 native,embench-qrduino,256,21843.0,218.0,us/iteration
 native,embench-qrduino,512,21843.0,218.0,us/iteration
 native,embench-qrduino,1024,21843.0,218.0,us/iteration
-native,embench-qrduino,2048,872.0,8.0,us/iteration
-native,embench-qrduino,4096,872.0,8.0,us/iteration

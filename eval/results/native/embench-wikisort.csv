@@ -10,5 +10,3 @@ native,embench-wikisort,128,36850.0,368.0,us/iteration
 native,embench-wikisort,256,36850.0,368.0,us/iteration
 native,embench-wikisort,512,36850.0,368.0,us/iteration
 native,embench-wikisort,1024,36850.0,368.0,us/iteration
-native,embench-wikisort,2048,15878.0,158.0,us/iteration
-native,embench-wikisort,4096,5392.0,53.0,us/iteration

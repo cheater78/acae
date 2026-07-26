@@ -11,4 +11,3 @@ acae,embench-qrduino,256,14846.0,148.0,us/iteration
 acae,embench-qrduino,512,14846.0,148.0,us/iteration
 acae,embench-qrduino,1024,14846.0,148.0,us/iteration
 acae,embench-qrduino,2048,14846.0,148.0,us/iteration
-acae,embench-qrduino,4096,4360.0,43.0,us/iteration

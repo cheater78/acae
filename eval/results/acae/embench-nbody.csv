@@ -10,5 +10,3 @@ acae,embench-nbody,128,26914.0,269.0,us/iteration
 acae,embench-nbody,256,26914.0,269.0,us/iteration
 acae,embench-nbody,512,26914.0,269.0,us/iteration
 acae,embench-nbody,1024,26914.0,269.0,us/iteration
-acae,embench-nbody,2048,5943.0,59.0,us/iteration
-acae,embench-nbody,4096,5943.0,59.0,us/iteration
