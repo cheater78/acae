@@ -124,12 +124,12 @@ def capitalize(s: str, all: bool = False):
         caps += c.upper()
     return caps
 
-def sns_bar_add_value_text(barplot) -> None:
+def sns_bar_add_value_text(barplot, label_at_bottom: bool = False) -> None:
     # text config
     fontsize=10
     color="black"
     fontweight='bold'
-    precision=3
+    precision=1
     margin_percent: tuple[float, float] = (0.00, 0.02)
 
     # plot characteristics
@@ -150,7 +150,7 @@ def sns_bar_add_value_text(barplot) -> None:
 
         test_label = barplot.text(
             bar_pos_x + bar_width / 2,
-            bar_height,
+            bar_height if not label_at_bottom else margin[1],
             f'{bar_value:.{precision}f}',
             ha="center", va="bottom",
             fontsize=fontsize, fontweight=fontweight, color=color
@@ -342,10 +342,8 @@ def plot_suite_platform_comparisons(suite: str) -> None:
 
 ######################################################################################################################
 
-def plot_all_benchmark_deviation() -> None:
-    plot_file: str = os.path.abspath(f"{plot_path}/deviations.pdf")
-    parent_path: str = os.path.abspath(f"{plot_path}")
 
+def calc_all_benchmark_deviation() -> pd.DataFrame:
     dataset_files: list[str] = [
         os.path.abspath(f"{results_path}/{platform}/{benchmark}.csv") \
         for platform in platforms \
@@ -449,6 +447,29 @@ def plot_all_benchmark_deviation() -> None:
         ]
     ]
 
+    suite_statistics = (
+        plot_dataframe
+        .groupby("suite")["acae_deviation"]
+        .agg(["mean", "std"])
+        .rename(columns={"std": "sd"})
+        .reset_index()
+    )
+
+    print(suite_statistics)
+
+    print(plot_dataframe[["benchmark", "suite", "acae_deviation"]])
+
+
+
+    return plot_dataframe
+
+
+def plot_all_benchmark_deviation() -> None:
+    plot_file: str = os.path.abspath(f"{plot_path}/deviations.pdf")
+    parent_path: str = os.path.abspath(f"{plot_path}")
+
+    plot_dataframe = calc_all_benchmark_deviation()
+    
     plt.figure()
     deviation_bar_plt = sns.barplot(
         x="benchmark",
@@ -475,6 +496,144 @@ def plot_all_benchmark_deviation() -> None:
 
 ######################################################################################################################
 
+# D. Patterson et al., "Embench IOT 2.0 and DSP 1.0: Modern Embedded Computing Benchmarks," in Computer, vol. 58, no. 5, pp. 37-47, May 2025, doi: 10.1109/MC.2024.3511352. keywords: {Embedded computing;Benchmark testing;Internet of Things},
+# see Table1
+# Workload distribution (on RISC-V) regarding branching, memory, compute
+# TODO: move to results or data folder as csv
+embench_workload: dict[str, tuple[float, float, float]] = {
+    "aha-mont64":       (0.10, 0.01, 0.89),
+    "crc32":            (0.14, 0.14, 0.72),
+    "cubic":            (0.14, 0.16, 0.69),
+    "edn":              (0.10, 0.29, 0.61),
+    "huffbench":        (0.23, 0.26, 0.51),
+    "matmult-int":      (0.12, 0.38, 0.50),
+    "minver":           (0.17, 0.28, 0.55),
+    "nbody":            (0.17, 0.10, 0.72),
+    "nettle-aes":       (0.02, 0.20, 0.78),
+    "nettle-sha256":    (0.01, 0.14, 0.84),
+    "nsichneu":         (0.45, 0.54, 0.01),
+    "picojpeg":         (0.11, 0.28, 0.61),
+    "qrduino":          (0.15, 0.20, 0.65),
+    "sglib-combined":   (0.26, 0.38, 0.36),
+    "slre":             (0.27, 0.31, 0.42),
+    "st":               (0.16, 0.11, 0.72),
+    "statemate":        (0.14, 0.72, 0.13),
+    "ud":               (0.17, 0.24, 0.58),
+    "wikisort":         (0.20, 0.38, 0.42),
+}
+
+def normalize_table() -> None:
+    for b, dist in embench_workload.items():
+        unit: float = dist[0] + dist[1] + dist[2]
+        embench_workload[b] = (dist[0] / unit, dist[1] / unit, dist[2] / unit)
+normalize_table() # published numbers are rounded to integer percent -> best we can do is normalize to 1.0
+
+def verify_table() -> None:
+    for b, dist in embench_workload.items():
+        if dist[0] + dist[1] + dist[2] != 1.0:
+            print(f"{b}: {dist[0]} + {dist[1]} + {dist[2]} = {dist[0] + dist[1] + dist[2]}")
+verify_table()
+
+def calc_weighted_workload_deviation() -> pd.DataFrame:
+    plot_dataframe = calc_all_benchmark_deviation()
+
+    # get embench only entries
+    plot_dataframe = plot_dataframe[plot_dataframe["suite"] == "embench"]
+
+    benchmark_deviations = plot_dataframe[["benchmark", "acae_deviation"]].copy()
+
+    def weighted_workload_deviation(row: pd.Series) -> pd.Series:
+        benchmark: str = row["benchmark"]
+        weights: tuple[float, float, float] = embench_workload[benchmark]
+        deviation: float = row["acae_deviation"]
+        return pd.Series({
+            "riscv_branching_weight": (weights[0]),
+            "riscv_memory_weight": (weights[1]),
+            "riscv_compute_weight": (weights[2]),
+            "acae_branching_deviation": (weights[0] * deviation),
+            "acae_memory_deviation": (weights[1] * deviation),
+            "acae_compute_deviation": (weights[2] * deviation),
+        })
+
+    benchmark_deviations = benchmark_deviations.copy()
+
+    benchmark_deviations[[
+            "riscv_branching_weight",
+            "riscv_memory_weight",
+            "riscv_compute_weight",
+            "acae_branching_deviation",
+            "acae_memory_deviation",
+            "acae_compute_deviation"
+            ]] = benchmark_deviations.apply(weighted_workload_deviation, axis=1)
+
+    print(benchmark_deviations)
+
+    return benchmark_deviations
+
+
+def plot_embench_weighted_workload_deviation() -> None:
+    plot_file: str = os.path.abspath(f"{plot_path}/deviation_workloads.pdf")
+    parent_path: str = os.path.abspath(f"{plot_path}")
+
+    benchmark_deviations = calc_weighted_workload_deviation()
+
+    benchmark_deviations[[
+        "branching",
+        "memory",
+        "compute",
+        ]] = benchmark_deviations[[
+            "acae_branching_deviation",
+            "acae_memory_deviation",
+            "acae_compute_deviation",
+        ]]
+
+    print(
+        f"branching: {benchmark_deviations["branching"].mean()} {benchmark_deviations["branching"].std()}\n"
+        f"memory: {benchmark_deviations["memory"].mean()} {benchmark_deviations["memory"].std()}\n"
+        f"compute: {benchmark_deviations["compute"].mean()} {benchmark_deviations["compute"].std()}"
+    )
+
+    workload_cols = [
+        "branching",
+        "memory",
+        "compute",
+    ]
+
+    workloads = benchmark_deviations[workload_cols].melt(
+        var_name="workload",
+        value_name="deviation"
+    )
+    
+    plt.figure()
+    deviation_bar_plt = sns.barplot(
+        x="workload",
+        y="deviation",
+        data=workloads,
+        legend=True,
+        errorbar="sd",
+        capsize=0.25,
+        err_kws={
+            "linewidth": 1.0,
+            "color": "grey",
+        },
+    )
+    sns_bar_add_value_text(deviation_bar_plt)
+
+    #plt.subplots_adjust(
+    #    bottom=0.3,  # more room for x labels
+    #    top=0.9      # more room for title
+    #)
+
+    plt.xlabel("workload")
+    plt.ylabel("deviation")
+    plt.title(f"Mean deviation of Embench benchmarks weighted by workload (in %)")
+
+    os.makedirs(parent_path, exist_ok=True)
+    plt.savefig(f"{plot_file}", format="pdf", transparent=True)
+
+
+######################################################################################################################
+
 # individual avg benchmark score per iterations bar plots
 plot_benchmark("acae", "dhrystone")
 plot_benchmark("native", "dhrystone")
@@ -489,5 +648,6 @@ plot_suite_benchmarks("native", "embench")
 plot_suite_platform_comparisons("embench")
 
 plot_all_benchmark_deviation()
+plot_embench_weighted_workload_deviation()
 
 # plt.show()
