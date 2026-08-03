@@ -169,7 +169,7 @@ The STM32 must be placed into DFU mode before the initial flash.
 Example:
 
 ```bash
-ITERATIONS=1 make -C benchmark/template clean build run
+PLATFORM=native ITERATIONS=1 make -C benchmark/template clean build run
 ```
 
 After the initial flash, subsequent flashing is handled automatically through ACAE's UART-based DFU workflow once the benchmark has completed execution.
