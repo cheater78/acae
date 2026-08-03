@@ -313,7 +313,7 @@ The initial flash requires manual entry into DFU mode.
 
 Subsequent flashing is handled automatically through the UART relay interface.
 
-## Publications
+# Publications
 
 ### A smart meter MCU emulation, introducing ACAE: An ARM cycle accounting emulator
 - original work on constructing ACAE: [Paper](paper/main/main.pdf)
