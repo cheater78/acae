@@ -57,10 +57,7 @@ static inline byte* get_heap_start() {
 }
 byte* get_heap_end();
 
-static inline void exit(int status) {
-    extern void _exit(int status);
-    _exit(status);
-}
+void exit(int status);
 
 #include <platform.h>
 #include <dwt.h>

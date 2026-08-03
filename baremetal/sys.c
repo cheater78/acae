@@ -91,6 +91,10 @@ void _fini() {
 
 //~ system backend implementations
 
-inline byte* get_heap_end() {
+byte* get_heap_end() {
     return __heap_end__;
+}
+
+void exit(int status) {
+    _exit(status);
 }

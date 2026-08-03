@@ -48,7 +48,7 @@ install_flasher_ubuntu() {
 }
 
 install_deps_arch() {
-    sudo pacman -Sy --needed \
+    sudo pacman -Sy --needed --noconfirm \
         git \
         base-devel \
         glib2 \
@@ -65,7 +65,7 @@ install_deps_arch() {
 }
 
 install_toolchain_arch() {
-    sudo pacman -S --needed \
+    sudo pacman -S --needed --noconfirm \
         arm-none-eabi-gcc \
         arm-none-eabi-binutils \
         arm-none-eabi-gdb \
@@ -73,7 +73,7 @@ install_toolchain_arch() {
 }
 
 install_flasher_arch() {
-    sudo pacman -S --needed \
+    sudo pacman -S --needed --noconfirm \
         dfu-util
 }
 

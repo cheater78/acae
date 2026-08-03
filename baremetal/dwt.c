@@ -1,6 +1,6 @@
 #include "dwt.h"
 
-#include "printf.h"
+#include <printf.h>
 
 void init_dwt() {
     // HW needs debug enabled first! -> platform_init
@@ -11,4 +11,9 @@ void init_dwt() {
     printf("DWT_LAR = %08lx\n", DWT_LAR);
     printf("DWT_CTRL = %08lx\n", DWT_CTRL);
     printf("DWT_CYCCNT = %08lx\n", DWT_CYCCNT);
+}
+
+__attribute__((noinline))
+unsigned long dwt_cyccnt() {
+    return DWT_CYCCNT;
 }

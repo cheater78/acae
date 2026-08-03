@@ -10,7 +10,7 @@ char* strcpy(char *dest, const char *src);
 int strcmp(const char *s1, const char *s2);
 
 // memory.h
-void* malloc(unsigned long size);
+void* malloc(unsigned int size);
 void free(void* p);
 
 // sys/times.h

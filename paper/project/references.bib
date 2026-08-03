@@ -1,0 +1,202 @@
+% ARM baremetal basics
+@misc{ARMBMBASICS,
+  title = "A bare-metal programming guide",
+  author = "Sergey Lyubka",
+  howpublished = {\url{https://developer.arm.com/community/arm-community-blogs/b/internet-of-things-blog/posts/a-bare-metal-programming-guide}},
+  note = {Accessed: 2026-05-10}}
+% ---- ARM CM4 Documentation ---------------------------------------------------------------------------------------------
+@misc{ARMCM4DOC,
+  title = "Arm Cortex-M4 Processor Technical Reference Manual",
+  author = "Arm Limited",
+  howpublished = {\url{https://developer.arm.com/documentation/100166/0001}},
+  note = {Accessed: 2026-05-01}}
+@misc{ARMCHIPCOMPARE,
+  title = "Arm Cortex-M Processor Comparison Table",
+  author = "Arm Limited",
+  howpublished = {\url{https://developer.arm.com/-/media/Arm\%20Developer\%20Community/PDF/Cortex-A\%20R\%20M\%20datasheets/Arm\%20Cortex-M\%20Comparison\%20Table_v3.pdf}},
+  note = {Accessed: 2026-05-18}}
+
+% ---- EMULATORS ---------------------------------------------------------------------------------------------
+% general
+@ARTICLE{8718630,
+  author={Akram, Ayaz and Sawalha, Lina},
+  journal={IEEE Access}, 
+  title={A Survey of Computer Architecture Simulation Techniques and Tools}, 
+  year={2019},
+  volume={7},
+  number={},
+  pages={78120-78145},
+  keywords={Computer architecture;Computational modeling;Tools;Object oriented modeling;Microarchitecture;Timing;Adaptation models;Computer architecture simulators;simulation techniques;validation;x86 simulators;simulators evaluation},
+  doi={10.1109/ACCESS.2019.2917698}}
+@INPROCEEDINGS{5642102,
+  author={Böhm, Igor and Franke, Björn and Topham, Nigel},
+  booktitle={2010 International Conference on Embedded Computer Systems: Architectures, Modeling and Simulation}, 
+  title={Cycle-accurate performance modelling in an ultra-fast just-in-time dynamic binary translation instruction set simulator}, 
+  year={2010},
+  volume={},
+  number={},
+  pages={1-10},
+  keywords={Pipelines;Microarchitecture;Load modeling;Adaptation model;Registers;Analytical models;Delay},
+  doi={10.1109/ICSAMOS.2010.5642102}}
+% QEMU
+@inproceedings{bellard2005qemu,
+  title={QEMU, a fast and portable dynamic translator.},
+  author={Bellard, Fabrice and others},
+  booktitle={Usenix ATC, Freenix Track},
+  pages={41--46},
+  year={2005}
+}
+@misc{66920,
+  title = "Emulating the Internet of Things with QEMU",
+  author = "Osman, Gyokan O.",
+  howpublished = {\url{http://hdl.handle.net/2077/66920}},
+  year = {2020},
+  note = {Accessed: 2025-12-01}}
+@misc{QEMU-WebSite,
+  title = "QEMU",
+  author = "Software Freedom Conservancy",
+  howpublished = {\url{https://www.qemu.org/}},
+  note = {Accessed: 2025-12-01}}
+
+% ---- BENCHMARKING ---------------------------------------------------------------------------------------------
+
+% Dhrystone
+@article{10.1145/358274.358283,
+  author = {Weicker, Reinhold P.},
+  title = {Dhrystone: a synthetic systems programming benchmark},
+  year = {1984},
+  issue_date = {Oct 1984},
+  publisher = {Association for Computing Machinery},
+  address = {New York, NY, USA},
+  volume = {27},
+  number = {10},
+  issn = {0001-0782},
+  url = {https://doi.org/10.1145/358274.358283},
+  doi = {10.1145/358274.358283},
+  abstract = {Reflecting current data on the use of programming language constructs in systems programming, a synthetic benchmark is constructed based on the distribution appearing in the data. The benchmark executes 100 Ada statements that are balanced in terms of the distribution of statement types, data types, and data locality. Pascal and C versions of the benchmark are discussed.},
+  journal = {Commun. ACM},
+  month = oct,
+  pages = {1013-1030},
+  numpages = {18},
+  keywords = {statistics, benchmark, Whetstone, Dhrystone}
+}
+@article{weiss2002dhrystone,
+  title={Dhrystone benchmark},
+  author={Weiss, Alan R},
+  journal={History, Analysis,„Scores “and Recommendations, White Paper, ECL/LLC},
+  year={2002}
+}
+@article{york2002benchmarking,
+  title={Benchmarking in context: Dhrystone},
+  author={York, Richard},
+  journal={ARM, March},
+  year={2002}
+}
+
+% EEMBC CoreMark
+@article{gal2012exploring,
+  title={Exploring coremark a benchmark maximizing simplicity and efficacy},
+  author={Gal-On, Shay and Levy, Markus},
+  journal={The Embedded Microprocessor Benchmark Consortium},
+  volume={6},
+  number={23},
+  pages={87},
+  year={2012}
+}
+@misc{EEMBC-WebSite,
+  title = "EEMBC",
+  author = "EEMBC",
+  howpublished = {\url{https://www.eembc.org/}},
+  note = {Accessed: 2025-12-18}}
+
+% Embench
+@misc{EMBENCH-REPO,
+  title = "Embench: Open Benchmarks for Embedded Platforms",
+  author = "Free and Open Source Silicon Foundation",
+  howpublished = {\url{https://github.com/embench/embench-iot}},
+  note = {Accessed: 2026-07-20}}
+
+@article{patterson2019embench,
+  title={Embench: Recruiting for the long overdue and deserved demise of Dhrystone as a benchmark for embedded computing},
+  author={Patterson, David and Bennett, J and Dabbelt, P and Garlati, C and Madhusudan, GS},
+  journal={Computer Architecture Today Blog, Jun},
+  volume={11},
+  year={2019}
+}
+
+@ARTICLE{10970203,
+  author={Patterson, David and Bennett, Jeremy and Bennett, Mary and Chelin, Hélène and Harris, David and Hellar, Jennifer and Jones, William and Moron, Konrad and Savini, Paolo and Shepherd, Roger and Simar, Ray and Susskind, Zachary and Wallentowitz, Stefan},
+  journal={Computer}, 
+  title={Embench IOT 2.0 and DSP 1.0: Modern Embedded Computing Benchmarks}, 
+  year={2025},
+  volume={58},
+  number={5},
+  pages={37-47},
+  keywords={Embedded computing;Benchmark testing;Internet of Things},
+  doi={10.1109/MC.2024.3511352}}
+
+
+% Embench Origin
+
+% BEEBS
+@article{pallister2013beebs,
+  title={BEEBS: Open benchmarks for energy measurements on embedded platforms},
+  author={Pallister, James and Hollis, Simon and Bennett, Jeremy},
+  journal={arXiv preprint arXiv:1308.5174},
+  year={2013}
+}
+
+% MiBench
+@INPROCEEDINGS{990739,
+  author={Guthaus, M.R. and Ringenberg, J.S. and Ernst, D. and Austin, T.M. and Mudge, T. and Brown, R.B.},
+  booktitle={Proceedings of the Fourth Annual IEEE International Workshop on Workload Characterization. WWC-4 (Cat. No.01EX538)}, 
+  title={MiBench: A free, commercially representative embedded benchmark suite}, 
+  year={2001},
+  volume={},
+  number={},
+  pages={3-14},
+  keywords={Microprocessors;Application software;Parallel processing;Process design;Microcontrollers;Code standards;Instruction sets;Digital audio players;Computer science;Multimedia systems},
+  doi={10.1109/WWC.2001.990739}}
+
+% WCET
+@InProceedings{Gustafsson:WCET2010:Benchmarks,
+  author = {Jan Gustafsson and Adam Betts and Andreas Ermedahl and Bj{\"{o}}rn Lisper},
+  title = {The {M{\"a}lardalen} {WCET} Benchmarks -- Past, Present and Future},
+  booktitle = WCET2010,
+  OPTcrossref = {},
+  OPTkey = {},
+  pages = {137--147},
+  year = {2010},
+  editor = {Bj{\"o}rn Lisper},
+  OPTvolume = {},
+  OPTnumber = {},
+  OPTseries = {},
+  address = {Brussels, Belgium},
+  month = jul,
+  OPTorganization = {},
+  publisher = {OCG},
+  OPTnote = {},
+  OPTannote = {}
+}
+
+% DSPstone
+@misc{DSPstone,
+  title = "DSPstone - DSP Compiler and Processor Evaluation",
+  author = "RWTH Aachen University",
+  howpublished = {\url{https://www.ice.rwth-aachen.de/cms/ice/Forschung/Abgeschlossene-Projekte/~bjxhfy/DSPstone-DSP-Compiler-und-Prozessoreval/lidx/1/}},
+  note = {Accessed: 2026-07-25}}
+
+% Nettle
+@misc{Nettle,
+  title = "Nettle - a low-level cryptographic library",
+  author = "Niels M{\"o}ller",
+  howpublished = {\url{https://www.lysator.liu.se/~nisse/nettle/}},
+  note = {Accessed: 2026-07-26}}
+
+% ---- ACAE REPO ---------------------------------------------------------------------------------------------
+@misc{ACAE-REPO,
+  title = "ACAE",
+  author = "Jakob Fregin",
+  howpublished = {\url{https://github.com/cheater78/acae}},
+  note = {Accessed: 2026-06-12}}
+

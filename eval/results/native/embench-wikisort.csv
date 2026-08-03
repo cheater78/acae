@@ -1,0 +1,12 @@
+platform,benchmark,iterations,score,score_per_mhz,unit
+native,embench-wikisort,1,36852.0,368.0,us/iteration
+native,embench-wikisort,2,36851.0,368.0,us/iteration
+native,embench-wikisort,4,36850.0,368.0,us/iteration
+native,embench-wikisort,8,36850.0,368.0,us/iteration
+native,embench-wikisort,16,36850.0,368.0,us/iteration
+native,embench-wikisort,32,36850.0,368.0,us/iteration
+native,embench-wikisort,64,36850.0,368.0,us/iteration
+native,embench-wikisort,128,36850.0,368.0,us/iteration
+native,embench-wikisort,256,36850.0,368.0,us/iteration
+native,embench-wikisort,512,36850.0,368.0,us/iteration
+native,embench-wikisort,1024,36850.0,368.0,us/iteration

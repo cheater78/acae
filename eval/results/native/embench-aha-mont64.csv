@@ -1,0 +1,14 @@
+platform,benchmark,iterations,score,score_per_mhz,unit
+native,embench-aha-mont64,1,451.0,4.0,us/iteration
+native,embench-aha-mont64,2,450.0,4.0,us/iteration
+native,embench-aha-mont64,4,450.0,4.0,us/iteration
+native,embench-aha-mont64,8,450.0,4.0,us/iteration
+native,embench-aha-mont64,16,450.0,4.0,us/iteration
+native,embench-aha-mont64,32,450.0,4.0,us/iteration
+native,embench-aha-mont64,64,450.0,4.0,us/iteration
+native,embench-aha-mont64,128,450.0,4.0,us/iteration
+native,embench-aha-mont64,256,450.0,4.0,us/iteration
+native,embench-aha-mont64,512,450.0,4.0,us/iteration
+native,embench-aha-mont64,1024,450.0,4.0,us/iteration
+native,embench-aha-mont64,2048,450.0,4.0,us/iteration
+native,embench-aha-mont64,4096,450.0,4.0,us/iteration
